@@ -2,6 +2,7 @@
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
 #include "imgui.h"
+#include "imgui_node_graph_test.h"
 #include "imgui_impl_dx9.h"
 #include "imgui_impl_win32.h"
 #include <d3d9.h>
@@ -15,7 +16,8 @@ static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
 static D3DPRESENT_PARAMETERS    g_d3dpp = {};
 
 // Forward declarations of helper functions
-void ShowAppMainMenuBar(bool* show_demo_window);
+void ShowAppMainMenuBar(bool* show_demo_window, bool* show_graph_window, bool* show_nodes_window);
+void ShowNodeGraph(bool* p_open);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void ResetDevice();
@@ -73,6 +75,8 @@ int main(int, char**)
 
 	// Our state
 	bool show_demo_window = false;
+	bool show_graph_window = false;
+	bool show_nodes_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	// Main loop
@@ -97,11 +101,17 @@ int main(int, char**)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ShowAppMainMenuBar(&show_demo_window);
+		ShowAppMainMenuBar(&show_demo_window, &show_graph_window, &show_nodes_window);
 
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
+
+		if (show_graph_window)
+			ImGui::ShowExampleAppCustomNodeGraph(&show_graph_window);
+
+		if (show_nodes_window)
+			ImGui::ShowExampleAppCustomNodeGraph2(&show_nodes_window);
 
 		// Rendering
 		ImGui::EndFrame();
@@ -136,7 +146,7 @@ int main(int, char**)
 
 // Helper functions ---------
 // Main Menu Bar
-void ShowAppMainMenuBar(bool* show_demo_window)
+void ShowAppMainMenuBar(bool* show_demo_window, bool* show_graph_window, bool* show_nodes_window)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -162,6 +172,12 @@ void ShowAppMainMenuBar(bool* show_demo_window)
 			if (ImGui::MenuItem("Demo Window")) 
 			{
 				*show_demo_window = true;
+			}
+			if (ImGui::MenuItem("Graph test")) {
+				*show_graph_window = true;
+			}
+			if (ImGui::MenuItem("Node test")) {
+				*show_nodes_window = true;
 			}
 			ImGui::EndMenu();
 		}
