@@ -599,7 +599,7 @@ void renderLines(ImDrawList* drawList, ImVec2 offset)
 IMGUI_API void ImGui::ShowExampleAppCustomNodeGraph2(bool* opened)
 {
     ImGui::SetNextWindowSize(ImVec2(700,600), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Example: Custom Node Graph", opened))
+    if (!ImGui::Begin("Example: Custom Node Graph2", opened))
     {
         ImGui::End();
         return;

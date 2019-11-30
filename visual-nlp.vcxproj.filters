@@ -48,10 +48,10 @@
     <ClCompile Include="node_graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Node.cpp">
+    <ClCompile Include="node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NodeLink.cpp">
+    <ClCompile Include="node_link.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,13 +80,10 @@
     <ClInclude Include="imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="imgui_node_graph_test.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NodeLink.h">
+    <ClInclude Include="node_link.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
