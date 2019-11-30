@@ -2,12 +2,13 @@
 #define NODELINK_H
 #pragma once
 #include "imgui.h"
-class NodeLink
-{
+class NodeLink {
 public:
-	int input_id;
-	int input_slot;
-	int output_id;
-	int output_slot;
+	int		input_id;
+	int		input_slot;
+	int		output_id;
+	int		output_slot;
+
+	NodeLink(int input_id, int input_slot, int output_id, int output_slot);
 };
-#endif //NODELINE_H
+#endif  // NODELINE_H
