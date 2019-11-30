@@ -45,6 +45,15 @@
     <ClCompile Include="imgui_nodes.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="node_graph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeLink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imconfig.h">
@@ -73,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="imgui_node_graph_test.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeLink.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
