@@ -2,14 +2,15 @@
 #define NODELINK_H
 #pragma once
 #include "imgui.h"
+#include "node_conn.h"
+
 class NodeLink {
 public:
-	int		input_id;
-	int		input_slot;
-	int		output_id;
-	int		output_slot;
+	NodeConn* input;
+	NodeConn* output;
 
-	NodeLink(int input_id, int input_slot, int output_id, int output_slot);
+	NodeLink(NodeConn* input, NodeConn* output);
+	virtual ~NodeLink();
 	void SwapDirection();
 };
-#endif  // NODELINE_H
+#endif // NODELINE_H

@@ -24,8 +24,7 @@ void ShowNodeGraph(bool* p_open) {
 		return;
 	}
 
-	static ImVector<Node> nodes;
-	static ImVector<NodeLink> links;
+	static ImVector<Node*> nodes;
 
 	static bool initialised = false;
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
@@ -33,9 +32,9 @@ void ShowNodeGraph(bool* p_open) {
 	static int node_selected = -1;
 
 	if (!initialised) {
-		nodes.push_back(Node("Node One", ImVec2(40, 50), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes.push_back(Node("Node Two", ImVec2(40, 150), ImVec2(0.5f, 0.5f), 1, 1));
-		links.push_back(NodeLink(0, 0, 1, 0));
+		nodes.push_back(new Node("Node One", ImVec2(40, 50), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes.push_back(new Node("Node Two", ImVec2(40, 150), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes[0]->AddLink(0, Conn_Type::output, nodes[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 	}
 
@@ -43,21 +42,26 @@ void ShowNodeGraph(bool* p_open) {
 	int node_hovered_in_list = -1;
 	int node_hovered_in_scene = -1;
 
-	static bool connector_hovered = false;
-	static Node* hover_connector = nullptr;
-	static bool hover_connector_is_input = true;
-	static int hover_connector_slot = -1;
-
-	static bool connection_drag = false;
-	static Node* drag_connector_node = nullptr;
-	static bool drag_connector_is_input = true;
-	static int drag_connector_slot= -1;
+	static bool conn_hover = false;
+	static bool conn_drag = false;
+	static NodeConn* hovered_conn = nullptr;
+	static NodeConn* dragged_conn = nullptr;
+	
+	if (hovered_conn != nullptr) {
+		std::cout << "HoveredConn:" << hovered_conn->node->name << ", Input?:" << (hovered_conn->type == Conn_Type::input ? "input" : "output") << ", Slot:" << hovered_conn->slot_num;
+	}
+	if (dragged_conn != nullptr) {
+		std::cout << " | DraggedConn:" << dragged_conn->node->name << ", Input?:" << (dragged_conn->type == Conn_Type::input ? "input" : "output") << ", Slot:" << dragged_conn->slot_num << "\r";
+	}
+	else {
+		std::cout << "\r";
+	}
 
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
 	ImGui::Separator();
 	for (int node_id = 0; node_id < nodes.Size; node_id++) {
-		Node* node = &nodes[node_id];
+		Node* node = nodes[node_id];
 		ImGui::PushID(node->id);
 		if (ImGui::Selectable(node->name, node->id == node_selected)) {
 			node_selected = node->id;
@@ -101,49 +105,51 @@ void ShowNodeGraph(bool* p_open) {
 			draw_list->AddLine(ImVec2(0.0f, y) + win_pos, ImVec2(canvas_size.x, y) + win_pos, GRID_COLOUR);
 	}
 
-	// Display links
+	// Split frame into two layers, one for links, and one for nodes.
 	draw_list->ChannelsSplit(2);
-	draw_list->ChannelsSetCurrent(0);
-	for (int link_id = 0; link_id < links.Size; link_id++) {
-		NodeLink* link = &links[link_id];
-		Node* node_inp = &nodes[link->input_id];
-		Node* node_out = &nodes[link->output_id];
-		ImVec2 p1 = offset + node_inp->GetOutputSlotPos(link->input_slot);
-		ImVec2 p2 = offset + node_out->GetInputSlotPos(link->output_slot);
-		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
-	}
 
 	// Draw links to mouse
-	if (connection_drag && ImGui::IsMouseDown(0)) {
+	if (conn_drag && ImGui::IsMouseDown(0)) {
 		draw_list->ChannelsSetCurrent(1);
 		ImVec2 p1, p2;
-		if (drag_connector_is_input) {
+		if (dragged_conn->type == Conn_Type::input) {
 			p1 = ImGui::GetIO().MousePos;
-			p2 = offset + drag_connector_node->GetInputSlotPos(drag_connector_slot);
+			p2 = offset + dragged_conn->pos;
 		}
 		else {
-			p1 = offset + drag_connector_node->GetOutputSlotPos(drag_connector_slot);
+			p1 = offset + dragged_conn->pos;
 			p2 = ImGui::GetIO().MousePos;
 		}
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
-	} else if (connection_drag && connector_hovered && !ImGui::IsMouseDown(0)) {
-		NodeLink new_link(drag_connector_node->id, drag_connector_slot, hover_connector->id, hover_connector_slot);
-		if (!drag_connector_is_input) {
-			new_link.SwapDirection();
+	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0)) {
+		NodeLink* new_link = new NodeLink(dragged_conn, hovered_conn);
+		std::cout << std::endl << "Link created!" << std::endl;
+		if (dragged_conn->type == Conn_Type::input) {
+			new_link->SwapDirection();
 		}
-		links.push_back(new_link);
-		connection_drag = false;
+		conn_drag = false;
 	}
 	else {
-		connection_drag = false;
+		conn_drag = false;
 	}
 
 	// Display nodes
 	for (int node_id = 0; node_id < nodes.Size; node_id++) {
-		Node* node = &nodes[node_id];
+		Node* node = nodes[node_id];
 		ImGui::PushID(node->id);
-		ImVec2 node_rect_min = offset + node->pos;
+		ImVec2 node_rect_min = offset + node->Pos();
+
+		// Draw links coming from output connections.
+		draw_list->ChannelsSetCurrent(0);
+		for (int i = 0; i < node->input_conns.Size; i++) {
+			NodeLink* link = node->input_conns[i]->link;
+			if (link != nullptr) {
+				ImVec2 p1 = offset + link->input->pos;
+				ImVec2 p2 = offset + link->output->pos;
+				draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
+			}
+		}
 
 		// Display node contents
 		draw_list->ChannelsSetCurrent(1); // Foreground
@@ -152,7 +158,7 @@ void ShowNodeGraph(bool* p_open) {
 		ImGui::BeginGroup(); // Lock horizontal position
 		ImGui::Text("%s", node->name);
 		ImGui::Separator();
-		ImGui::Text("Hello this is a node");
+		ImGui::Text("Node description...");
 		ImGui::EndGroup();
 
 		// Save the size of what we have emitted and wether any of the widgets are being used
@@ -169,39 +175,33 @@ void ShowNodeGraph(bool* p_open) {
 			open_context_menu |= ImGui::IsMouseClicked(1);
 		}
 
-		// Draw line from connector to mouse
-		connector_hovered = false;
+		// Track line from connector to mouse
+		conn_hover = false;
 		for (int j = 0; j < node->inputs_count; j++) {
-			ImVec2 con_pos = offset + node->GetInputSlotPos(j);
-			if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !connection_drag) {
-					drag_connector_node = node;
-					connection_drag = true;
-					drag_connector_is_input = true;
-					drag_connector_slot = j;
-					break;
+			NodeConn* conn = node->GetConn(j, Conn_Type::input);
+			ImVec2 conn_pos = offset + conn->pos;
+			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !conn_drag) {
+				dragged_conn = conn;
+				conn_drag = true;
+				break;
 			}
-			else if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS)) {
-				connector_hovered = true;
-				hover_connector = node;
-				hover_connector_is_input = true;
-				hover_connector_slot = j;
+			else if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+				hovered_conn = conn;
+				conn_hover = true;
 			}
 		}
 		
 		for (int j = 0; j < node->outputs_count; j++) {
-			ImVec2 con_pos = offset + node->GetOutputSlotPos(j);
-			if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !connection_drag) {
-				drag_connector_node = node;
-				connection_drag = true;
-				drag_connector_is_input = false;
-				drag_connector_slot = j;
+			NodeConn* conn = node->GetConn(j, Conn_Type::output);
+			ImVec2 conn_pos = offset + conn->pos;
+			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !conn_drag) {
+				dragged_conn = conn;
+				conn_drag = true;
 				break;
 			}
-			else if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS)) {
-				connector_hovered = true;
-				hover_connector = node;
-				hover_connector_is_input = false;
-				hover_connector_slot = j;
+			else if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+				hovered_conn = conn;
+				conn_hover = true;
 			}
 		}
 
@@ -209,27 +209,27 @@ void ShowNodeGraph(bool* p_open) {
 
 		if (node_widgets_active || node_moving_active)
 			node_selected = node->id;
-		if (node_moving_active && ImGui::IsMouseDragging(0) && !connector_hovered && !connection_drag)
-			node->pos = node->pos + ImGui::GetIO().MouseDelta;
+		if (node_moving_active && ImGui::IsMouseDragging(0) && !conn_hover && !conn_drag)
+			node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
 
 		ImU32 node_bg_color = (node_hovered_in_list == node->id || node_hovered_in_scene == node->id || (node_hovered_in_list == -1 && node_selected == node->id)) ? IM_COL32(75, 75, 75, 255) : IM_COL32(60, 60, 60, 255);
 		draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
 		draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
-		for (int slot_id = 0; slot_id < node->inputs_count; slot_id++) {
-			ImU32 con_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 con_pos = offset + node->GetInputSlotPos(slot_id);
-			if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS)) {
-				con_colour = IM_COL32(175, 175, 175, 175);
+		for (NodeConn* conn : node->input_conns) {
+			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
+			ImVec2 conn_pos = offset + conn->pos;
+			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
-			draw_list->AddCircleFilled(con_pos, NODE_SLOT_RADIUS, con_colour);
+			draw_list->AddCircleFilled(conn_pos, NODE_SLOT_RADIUS, conn_colour);
 		}
-		for (int slot_id = 0; slot_id < node->outputs_count; slot_id++) {
-			ImU32 con_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 con_pos = offset + node->GetOutputSlotPos(slot_id);
-			if (isConnectorHovered(con_pos, NODE_SLOT_RADIUS)) {
-				con_colour = IM_COL32(175, 175, 175, 175);
+		for (NodeConn* conn : node->output_conns) {
+			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
+			ImVec2 conn_pos = offset + conn->pos;
+			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
-			draw_list->AddCircleFilled(con_pos, NODE_SLOT_RADIUS, con_colour);
+			draw_list->AddCircleFilled(conn_pos, NODE_SLOT_RADIUS, conn_colour);
 		}
 
 		ImGui::PopID();
@@ -252,25 +252,21 @@ void ShowNodeGraph(bool* p_open) {
 	// Draw context menu
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("context_menu")) {
-		Node* node = node_selected != -1 ? &nodes[node_selected] : NULL;
+		Node* node = node_selected != -1 ? nodes[node_selected] : NULL;
 		ImVec2 scene_pos = ImGui::GetMousePosOnOpeningCurrentPopup() - offset;
 		if (node) {
 			ImGui::Text("Node '%s'", node->name);
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
-				for (int i = 0; i < links.Size; i++) {
-					if (links[i].input_id == node->id || links[i].output_id == node->id) {
-						links.erase(&links[i]);
-					}
-				}
-				nodes.erase(node);
+				delete nodes[node_selected];
+				nodes.erase(nodes.begin() + node_selected);
 			}
 			if (ImGui::MenuItem("Copy", NULL, false, false)) {}
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
-				nodes.push_back(Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
+				nodes.push_back(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}

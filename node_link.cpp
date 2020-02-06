@@ -1,13 +1,22 @@
 #include "node_link.h"
+#include <iostream>
 
-NodeLink::NodeLink(int input_id, int input_slot, int output_id, int output_slot)
-	: input_id(input_id), input_slot(input_slot), output_id(output_id), output_slot(output_slot) {}
+NodeLink::NodeLink(NodeConn* input, NodeConn* output) : input(input), output(output) {
+	input->link = this;
+	output->link = this;
+}
+
+NodeLink::~NodeLink() {
+	if (input != nullptr) {
+		input->link = nullptr;
+	}
+	if (output != nullptr) {
+		output->link = nullptr;
+	}
+}
 
 void NodeLink::SwapDirection() {
-	int temp_input_id = input_id;
-	int temp_input_slot = input_slot;
-	input_id = output_id;
-	input_slot = output_slot;
-	output_id = temp_input_id;
-	output_slot = temp_input_slot;
+	NodeConn* temp = output;
+	output = input;
+	input = temp;
 }
