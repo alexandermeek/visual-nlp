@@ -2,18 +2,33 @@
 #define NODE_H
 #pragma once
 #include "imgui.h"
+#include "node_conn.h"
+#include "node_link.h"
+#include <vector>
+
 class Node {
 private:
 	static int	next_id;
-public:
-	int			id;
-	char		name[32];
-	ImVec2		pos, size;
-	int			inputs_count, outputs_count;
 
-	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
+	ImVec2 pos;
 
 	ImVec2 GetInputSlotPos(int slot_num);
 	ImVec2 GetOutputSlotPos(int slot_num);
+public:
+	int					   id;
+	char				   name[32];
+	ImVec2				   size;
+	int					   inputs_count, outputs_count;
+	ImVector<NodeConn*> input_conns;
+	ImVector<NodeConn*> output_conns;
+
+	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
+	virtual ~Node();
+
+	ImVec2 Pos();
+	void Move(ImVec2 new_pos);
+
+	NodeConn* GetConn(int slot_num, Conn_Type type);
+	void AddLink(int slot_num, Conn_Type type, NodeConn* linked_conn);
 };
 #endif //NODE_H

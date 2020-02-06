@@ -54,6 +54,9 @@
     <ClCompile Include="node_link.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="node_conn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imconfig.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="node_link.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="node_conn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

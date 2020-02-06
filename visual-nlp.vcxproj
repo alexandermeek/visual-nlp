@@ -136,6 +136,7 @@
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="node.cpp" />
+    <ClCompile Include="node_conn.cpp" />
     <ClCompile Include="node_graph.cpp" />
     <ClCompile Include="node_link.cpp" />
   </ItemGroup>
@@ -149,6 +150,7 @@
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="node.h" />
+    <ClInclude Include="node_conn.h" />
     <ClInclude Include="node_link.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
