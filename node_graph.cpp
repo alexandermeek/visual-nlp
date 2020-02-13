@@ -1,9 +1,10 @@
 #include "imgui.h"
 #include "node.h"
 #include "node_link.h"
-#include <math.h> // fmodf
 
+#include <math.h> // fmodf
 #include <iostream>
+#include <memory>
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
@@ -47,7 +48,7 @@ void ShowNodeGraph(bool* p_open) {
 	static NodeConn* hovered_conn = nullptr;
 	static NodeConn* dragged_conn = nullptr;
 	
-	if (hovered_conn != nullptr) {
+	/*if (hovered_conn != nullptr) {
 		std::cout << "HoveredConn:" << hovered_conn->node->name << ", Input?:" << (hovered_conn->type == Conn_Type::input ? "input" : "output") << ", Slot:" << hovered_conn->slot_num;
 	}
 	if (dragged_conn != nullptr) {
@@ -55,7 +56,7 @@ void ShowNodeGraph(bool* p_open) {
 	}
 	else {
 		std::cout << "\r";
-	}
+	}*/
 
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
@@ -122,11 +123,14 @@ void ShowNodeGraph(bool* p_open) {
 		}
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
-	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0)) {
-		NodeLink* new_link = new NodeLink(dragged_conn, hovered_conn);
-		std::cout << std::endl << "Link created!" << std::endl;
-		if (dragged_conn->type == Conn_Type::input) {
-			new_link->SwapDirection();
+	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
+		std::cout << "wub";
+		NodeLink* new_link;
+		if (dynamic_cast<InputConn*>(dragged_conn)) {
+			new_link = new NodeLink((OutputConn*)hovered_conn, (InputConn*)dragged_conn);
+		}
+		else {
+			new_link = new NodeLink((OutputConn*)dragged_conn, (InputConn*)hovered_conn);
 		}
 		conn_drag = false;
 	}
@@ -143,10 +147,10 @@ void ShowNodeGraph(bool* p_open) {
 		// Draw links coming from output connections.
 		draw_list->ChannelsSetCurrent(0);
 		for (int i = 0; i < node->input_conns.Size; i++) {
-			NodeLink* link = node->input_conns[i]->link;
+			NodeLink* link = node->input_conns[i]->GetLink();
 			if (link != nullptr) {
-				ImVec2 p1 = offset + link->input->pos;
-				ImVec2 p2 = offset + link->output->pos;
+				ImVec2 p1 = offset + link->start->pos;
+				ImVec2 p2 = offset + link->end->pos;
 				draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
 			}
 		}
@@ -261,6 +265,8 @@ void ShowNodeGraph(bool* p_open) {
 			if (ImGui::MenuItem("Delete")) {
 				delete nodes[node_selected];
 				nodes.erase(nodes.begin() + node_selected);
+				dragged_conn = nullptr;
+				hovered_conn = nullptr;
 			}
 			if (ImGui::MenuItem("Copy", NULL, false, false)) {}
 		}
