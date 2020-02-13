@@ -13,11 +13,14 @@ public:
 	ImVec2    pos;
 	int       slot_num;
 	Conn_Type type;
-	NodeLink* link;
 	Node*     node;
 
 	NodeConn(Node* node, ImVec2 pos, int slot_num, Conn_Type type);
 	virtual ~NodeConn();
+
+	virtual NodeLink* GetLink() = 0;
+	virtual void AddLink(NodeLink* new_link) = 0;
+	virtual void RemoveLink(NodeLink* link) = 0;
 };
 #endif // NODECONN_H
 

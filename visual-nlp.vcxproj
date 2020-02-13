@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -134,11 +134,13 @@
     <ClCompile Include="imgui_nodes.cpp" />
     <ClCompile Include="imgui_node_graph_test.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
+    <ClCompile Include="input_conn.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="node_conn.cpp" />
     <ClCompile Include="node_graph.cpp" />
     <ClCompile Include="node_link.cpp" />
+    <ClCompile Include="output_conn.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imconfig.h" />
@@ -149,9 +151,11 @@
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="input_conn.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="node_conn.h" />
     <ClInclude Include="node_link.h" />
+    <ClInclude Include="output_conn.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

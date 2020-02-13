@@ -3,11 +3,6 @@
 #include <iostream>
 
 NodeConn::NodeConn(Node* node, ImVec2 pos, int slot_num, Conn_Type type)
-	: node(node), pos(pos), slot_num(slot_num), type(type), link(nullptr) {}
+	: node(node), pos(pos), slot_num(slot_num), type(type) {}
 
-NodeConn::~NodeConn() {
-	if (link != nullptr) {
-		delete link;
-		link = nullptr;
-	}
-}
+NodeConn::~NodeConn() {}

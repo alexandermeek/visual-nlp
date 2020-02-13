@@ -3,6 +3,8 @@
 #pragma once
 #include "imgui.h"
 #include "node_conn.h"
+#include "input_conn.h"
+#include "output_conn.h"
 #include "node_link.h"
 #include <vector>
 
@@ -19,8 +21,8 @@ public:
 	char				   name[32];
 	ImVec2				   size;
 	int					   inputs_count, outputs_count;
-	ImVector<NodeConn*> input_conns;
-	ImVector<NodeConn*> output_conns;
+	ImVector<InputConn*> input_conns;
+	ImVector<OutputConn*> output_conns;
 
 	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();
