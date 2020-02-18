@@ -3,9 +3,7 @@
 #include <iostream>
 
 NodeConn::NodeConn(Node* node, ImVec2 pos, int slot_num, Conn_Type type)
-	: node(node), pos(pos), slot_num(slot_num), type(type) {
-	printf("cpos=(%f,%f)\n", pos.x, pos.y);
-}
+	: node(node), pos(pos), slot_num(slot_num), type(type) {}
 
 NodeConn::~NodeConn() {}
 

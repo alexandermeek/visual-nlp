@@ -4,11 +4,7 @@
 int Node::next_id = 0;
 
 Node::Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count)
-	: pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count)
-{
-	printf("npos=(%f,%f) nsize=(%f,%f)\n", pos.x, pos.y, size.x, size.y);
-	printf("(%f,%f)\n", GetInputSlotPos(0).x, GetInputSlotPos(0).y);
-	printf("(%f,%f)\n", GetOutputSlotPos(0).x, GetOutputSlotPos(0).y);
+	: pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count) {
 	this->id = next_id++;
 	strncpy_s(this->name, name, 31);
 	this->name[31] = 0;
@@ -43,18 +39,30 @@ ImVec2 Node::GetOutputSlotPos(int slot_num) {
 }
 
 ImVec2 Node::Pos() {
-	return this->pos;
+	return pos;
+}
+
+ImVec2 Node::Size() {
+	return size;
+}
+
+void Node::UpdateConnPos() {
+	for (NodeConn* conn : input_conns) {
+		conn->pos = GetInputSlotPos(conn->slot_num);
+	}
+	for (NodeConn* conn : output_conns) {
+		conn->pos = GetOutputSlotPos(conn->slot_num);
+	}
+}
+
+void Node::Resize(ImVec2 new_size) {
+	size = new_size;
+	UpdateConnPos();
 }
 
 void Node::Move(ImVec2 new_pos) {
 	this->pos = new_pos;
-
-	for (int i = 0; i < input_conns.size(); i++) {
-		input_conns[i]->pos = GetInputSlotPos(i);
-	}
-	for (int i = 0; i < output_conns.size(); i++) {
-		output_conns[i]->pos = GetOutputSlotPos(i);
-	}
+	UpdateConnPos();
 }
 
 NodeConn* Node::GetConn(int slot_num, Conn_Type type) {
