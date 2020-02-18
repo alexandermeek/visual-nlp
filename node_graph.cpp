@@ -1,6 +1,7 @@
 #include "imgui.h"
 #include "node.h"
 #include "node_link.h"
+#include "node_vec.h"
 #include "link_vec.h"
 
 #include <math.h> // fmodf
@@ -42,9 +43,10 @@ void ShowNodeGraph(bool* p_open) {
 	}
 	static bool diagnosticsWindow = true;
 	static std::vector<std::string> stats;
+	stats.push_back("wub");
 	if (diagnosticsWindow) ShowDiagnosticsWindow(&diagnosticsWindow, &stats);
 
-	static ImVector<Node*> nodes;
+	static NodeVec nodes;
 	static LinkVec links;
 
 	static bool initialised = false;
@@ -53,8 +55,8 @@ void ShowNodeGraph(bool* p_open) {
 	static int node_selected = -1;
 
 	if (!initialised) {
-		nodes.push_back(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes.push_back(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes.AddNode(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes.AddNode(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
 		links.AddLink(nodes[0]->GetConn(0, Conn_Type::output), nodes[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 	}
@@ -71,7 +73,7 @@ void ShowNodeGraph(bool* p_open) {
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
 	ImGui::Separator();
-	for (int node_id = 0; node_id < nodes.Size; node_id++) {
+	for (int node_id = 0; node_id < nodes.Size(); node_id++) {
 		Node* node = nodes[node_id];
 		ImGui::PushID(node->id);
 		if (ImGui::Selectable(node->name, node->id == node_selected)) {
@@ -147,7 +149,7 @@ void ShowNodeGraph(bool* p_open) {
 	}
 
 	// Display nodes
-	for (int node_id = 0; node_id < nodes.Size; node_id++) {
+	for (int node_id = 0; node_id < nodes.Size(); node_id++) {
 		Node* node = nodes[node_id];
 		ImGui::PushID(node->id);
 		ImVec2 node_rect_min = offset + node->Pos();
@@ -265,7 +267,7 @@ void ShowNodeGraph(bool* p_open) {
 	// Draw context menu
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("context_menu")) {
-		Node* node = node_selected != -1 ? nodes[node_selected] : NULL;
+		Node* node = nodes.GetNode(node_selected);
 		ImVec2 scene_pos = ImGui::GetMousePosOnOpeningCurrentPopup() - offset;
 		if (node) {
 			ImGui::Text("Node '%s'", node->name);
@@ -281,8 +283,8 @@ void ShowNodeGraph(bool* p_open) {
 					links.RemoveLinks(conn);
 				}
 				
-				delete nodes[node_selected];
-				nodes.erase(nodes.begin() + node_selected);
+				nodes.RemoveNode(node_selected);
+				node_selected = -1;
 				dragged_conn = nullptr;
 				hovered_conn = nullptr;
 			}
@@ -290,7 +292,7 @@ void ShowNodeGraph(bool* p_open) {
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
-				nodes.push_back(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
+				nodes.AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}

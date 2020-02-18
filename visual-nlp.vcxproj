@@ -140,6 +140,7 @@
     <ClCompile Include="node_conn.cpp" />
     <ClCompile Include="node_graph.cpp" />
     <ClCompile Include="node_link.cpp" />
+    <ClCompile Include="node_vec.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imconfig.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="node.h" />
     <ClInclude Include="node_conn.h" />
     <ClInclude Include="node_link.h" />
+    <ClInclude Include="node_vec.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
