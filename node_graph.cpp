@@ -165,13 +165,13 @@ void ShowNodeGraph(bool* p_open) {
 
 		// Save the size of what we have emitted and wether any of the widgets are being used
 		bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
-		node->size = ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING;
-		ImVec2 node_rect_max = node_rect_min + node->size;
+		node->Resize(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
+		ImVec2 node_rect_max = node_rect_min + node->Size();
 
 		// Display node box
 		draw_list->ChannelsSetCurrent(0); // Background
 		ImGui::SetCursorScreenPos(node_rect_min);
-		ImGui::InvisibleButton("node", node->size);
+		ImGui::InvisibleButton("node", node->Size());
 		if (ImGui::IsItemHovered()) {
 			node_hovered_in_scene = node->id;
 			open_context_menu |= ImGui::IsMouseClicked(1);
@@ -295,11 +295,22 @@ void ShowNodeGraph(bool* p_open) {
 	if (conn_hover) {
 		stats.push_back("Hover = TRUE");
 		std::stringstream ss;
-		ss << "(" << hovered_conn->pos.x << "," << hovered_conn->pos.y << ")";
+		ss << "ConnPos(" << hovered_conn->pos.x << "," << hovered_conn->pos.y << ")";
 		stats.push_back(ss.str());
 	}
 	else stats.push_back("Hover = FALSE");
-
+	{
+		ImVec2 wat = ImGui::GetIO().MousePos - offset;
+		std::stringstream ss;
+		ss << "RelMousePos(" << wat.x << "," << wat.y << ")";
+		stats.push_back(ss.str());
+	}
+	if (node_selected != -1) {
+		Node* node = nodes.GetNode(node_selected);
+		std::stringstream ss;
+		ss << "NodeSize(" << node->Size().x << "," << node->Size().y << ")";
+		stats.push_back(ss.str());
+	}
 
 	ImGui::PopItemWidth();
 	ImGui::EndChild();

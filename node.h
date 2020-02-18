@@ -11,13 +11,15 @@ private:
 	static int	next_id;
 
 	ImVec2 pos;
+	ImVec2 size;
 
 	ImVec2 GetInputSlotPos(int slot_num);
 	ImVec2 GetOutputSlotPos(int slot_num);
+
+	void UpdateConnPos();
 public:
 	int					id;
 	char				name[32];
-	ImVec2				size;
 	int					inputs_count, outputs_count;
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
@@ -26,6 +28,8 @@ public:
 	virtual ~Node();
 
 	ImVec2 Pos();
+	ImVec2 Size();
+	void Resize(ImVec2);
 	void Move(ImVec2 new_pos);
 
 	NodeConn* GetConn(int slot_num, Conn_Type type);
