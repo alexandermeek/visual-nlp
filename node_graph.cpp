@@ -1,10 +1,12 @@
 #include "imgui.h"
 #include "node.h"
 #include "node_link.h"
+#include "link_vec.h"
 
 #include <math.h> // fmodf
 #include <iostream>
 #include <memory>
+#include <string>
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
@@ -18,14 +20,32 @@ static bool isConnectorHovered(ImVec2 con_pos, const float con_radius) {
 	return ((xd * xd) + (yd * yd)) < (con_radius * con_radius);
 }
 
+void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
+	if (!ImGui::Begin("Node Graph Diagnostics", p_open)) {
+		ImGui::End();
+		return;
+	}
+	//ImGui::SetNextWindowSize(ImVec2(70, 50), ImGuiCond_FirstUseEver);
+	ImGui::Text("Node Graph Diagnostics Tool");
+	for (int i = 0; i < stats->size(); i++) {
+		ImGui::Text("%s", stats[i]);
+	}
+
+	ImGui::End();
+}
+
 void ShowNodeGraph(bool* p_open) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
 		ImGui::End();
 		return;
 	}
+	static bool diagnosticsWindow = true;
+	static std::vector<std::string> stats;
+	if (diagnosticsWindow) ShowDiagnosticsWindow(&diagnosticsWindow, &stats);
 
 	static ImVector<Node*> nodes;
+	static LinkVec links;
 
 	static bool initialised = false;
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
@@ -33,9 +53,9 @@ void ShowNodeGraph(bool* p_open) {
 	static int node_selected = -1;
 
 	if (!initialised) {
-		nodes.push_back(new Node("Node One", ImVec2(40, 50), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes.push_back(new Node("Node Two", ImVec2(40, 150), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes[0]->AddLink(0, Conn_Type::output, nodes[1]->GetConn(0, Conn_Type::input));
+		nodes.push_back(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes.push_back(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		links.AddLink(nodes[0]->GetConn(0, Conn_Type::output), nodes[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 	}
 
@@ -47,16 +67,6 @@ void ShowNodeGraph(bool* p_open) {
 	static bool conn_drag = false;
 	static NodeConn* hovered_conn = nullptr;
 	static NodeConn* dragged_conn = nullptr;
-	
-	/*if (hovered_conn != nullptr) {
-		std::cout << "HoveredConn:" << hovered_conn->node->name << ", Input?:" << (hovered_conn->type == Conn_Type::input ? "input" : "output") << ", Slot:" << hovered_conn->slot_num;
-	}
-	if (dragged_conn != nullptr) {
-		std::cout << " | DraggedConn:" << dragged_conn->node->name << ", Input?:" << (dragged_conn->type == Conn_Type::input ? "input" : "output") << ", Slot:" << dragged_conn->slot_num << "\r";
-	}
-	else {
-		std::cout << "\r";
-	}*/
 
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
@@ -124,13 +134,11 @@ void ShowNodeGraph(bool* p_open) {
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
 	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
-		std::cout << "wub";
-		NodeLink* new_link;
-		if (dynamic_cast<InputConn*>(dragged_conn)) {
-			new_link = new NodeLink((OutputConn*)hovered_conn, (InputConn*)dragged_conn);
+		if (dragged_conn->type == Conn_Type::input) {
+			links.AddLink(hovered_conn, dragged_conn);
 		}
 		else {
-			new_link = new NodeLink((OutputConn*)dragged_conn, (InputConn*)hovered_conn);
+			links.AddLink(dragged_conn, hovered_conn);
 		}
 		conn_drag = false;
 	}
@@ -147,10 +155,10 @@ void ShowNodeGraph(bool* p_open) {
 		// Draw links coming from output connections.
 		draw_list->ChannelsSetCurrent(0);
 		for (int i = 0; i < node->input_conns.Size; i++) {
-			NodeLink* link = node->input_conns[i]->GetLink();
-			if (link != nullptr) {
-				ImVec2 p1 = offset + link->start->pos;
-				ImVec2 p2 = offset + link->end->pos;
+			ImVector<NodeLink*> conn_links = links.GetLinks(node->GetConn(i, Conn_Type::input));
+			if (conn_links.Size > 0) {
+				ImVec2 p1 = offset + conn_links[0]->start->pos;
+				ImVec2 p2 = offset + conn_links[0]->end->pos;
 				draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
 			}
 		}
@@ -161,7 +169,6 @@ void ShowNodeGraph(bool* p_open) {
 		ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 		ImGui::BeginGroup(); // Lock horizontal position
 		ImGui::Text("%s", node->name);
-		ImGui::Separator();
 		ImGui::Text("Node description...");
 		ImGui::EndGroup();
 
@@ -241,9 +248,11 @@ void ShowNodeGraph(bool* p_open) {
 	draw_list->ChannelsMerge();
 
 	// Open context menu
-	if (!ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(1)) {
+	if (!ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered() && (ImGui::IsMouseClicked(1) || ImGui::IsMouseClicked(0))) {
 		node_selected = node_hovered_in_list = node_hovered_in_scene = -1;
-		open_context_menu = true;
+		if (ImGui::IsMouseClicked(1)) {
+			open_context_menu = true;
+		}
 	}
 	if (open_context_menu) {
 		ImGui::OpenPopup("context_menu");
@@ -263,6 +272,15 @@ void ShowNodeGraph(bool* p_open) {
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
+				for (int i = 0; i < node->inputs_count; i++) {
+					NodeConn* conn = node->GetConn(i, Conn_Type::input);
+					links.RemoveLinks(conn);
+				}
+				for (int i = 0; i < node->outputs_count; i++) {
+					NodeConn* conn = node->GetConn(i, Conn_Type::output);
+					links.RemoveLinks(conn);
+				}
+				
 				delete nodes[node_selected];
 				nodes.erase(nodes.begin() + node_selected);
 				dragged_conn = nullptr;
@@ -283,6 +301,17 @@ void ShowNodeGraph(bool* p_open) {
 	// Scrolling
 	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(2, 0.0f))
 		scrolling = scrolling + ImGui::GetIO().MouseDelta;
+
+	// Update Diagnostics
+	stats.clear();
+	if (conn_drag) {
+		stats.push_back("Drag = TRUE");
+	}
+	else {
+		stats.push_back("Drag = FALSE");
+	}
+	
+
 
 	ImGui::PopItemWidth();
 	ImGui::EndChild();

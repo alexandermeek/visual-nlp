@@ -2,15 +2,14 @@
 #define NODELINK_H
 #pragma once
 #include "imgui.h"
-#include "input_conn.h"
-#include "output_conn.h"
+#include "node_conn.h"
 
 class NodeLink {
 public:
-	OutputConn* start;
-	InputConn* end;
+	NodeConn* start;
+	NodeConn* end;
 
-	NodeLink(OutputConn* start, InputConn* end);
+	NodeLink(NodeConn* start, NodeConn* end);
 	virtual ~NodeLink();
 };
 #endif // NODELINE_H

@@ -1,6 +1,5 @@
 #include "node.h"
-#include "input_conn.h"
-#include "output_conn.h"
+#include "node_conn.h"
 #include <iostream>
 int Node::next_id = 0;
 
@@ -12,11 +11,11 @@ Node::Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outp
 	this->name[31] = 0;
 
 	for (int i = 0; i < inputs_count; i++) {
-		InputConn* new_conn = new InputConn(this, GetInputSlotPos(i), i);
+		NodeConn* new_conn = new NodeConn(this, GetInputSlotPos(i), i, Conn_Type::input);
 		input_conns.push_back(new_conn);
 	}
 	for (int i = 0; i < outputs_count; i++) {
-		OutputConn* new_conn = new OutputConn(this, GetOutputSlotPos(i), i);
+		NodeConn* new_conn = new NodeConn(this, GetOutputSlotPos(i), i, Conn_Type::output);
 		output_conns.push_back(new_conn);
 	}
 }
@@ -69,23 +68,4 @@ NodeConn* Node::GetConn(int slot_num, Conn_Type type) {
 
 		return output_conns[slot_num];
 	}
-}
-
-void Node::AddLink(int slot_num, Conn_Type type, NodeConn* linked_conn) {
-	InputConn* end_conn = nullptr;
-	OutputConn* start_conn = nullptr;
-	if (type == Conn_Type::input) {
-		if (slot_num < inputs_count) {
-			end_conn = input_conns[slot_num];
-			start_conn = (OutputConn*)linked_conn;
-		}
-	}
-	else if (type == Conn_Type::output) {
-		if (slot_num < outputs_count) {
-			end_conn = (InputConn*)linked_conn;
-			start_conn = output_conns[slot_num];
-		}
-	}
-
-	NodeLink* new_link = new NodeLink(start_conn, end_conn);
 }
