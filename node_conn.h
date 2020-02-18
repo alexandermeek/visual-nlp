@@ -10,6 +10,8 @@ enum class Conn_Type { input, output };
 
 class NodeConn {
 public:
+	const float RADIUS = 4.0f;
+
 	ImVec2    pos;
 	int       slot_num;
 	Conn_Type type;
@@ -17,6 +19,8 @@ public:
 
 	NodeConn(Node* node, ImVec2 pos, int slot_num, Conn_Type type);
 	virtual ~NodeConn();
+
+	bool Hovered(ImVec2 offset);
 };
 #endif // NODECONN_H
 

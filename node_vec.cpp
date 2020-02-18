@@ -33,6 +33,14 @@ int NodeVec::Size() {
 	return nodes.Size;
 }
 
+Node** NodeVec::begin() {
+	return nodes.begin();
+}
+
+Node** NodeVec::end() {
+	return nodes.end();
+}
+
 Node* NodeVec::operator[](int pos) {
 	return nodes[pos];
 }

@@ -19,7 +19,10 @@ public:
 	void RemoveLink(NodeLink* link);
 	void RemoveLinks(NodeConn* conn);
 	ImVector<NodeLink*> GetLinks(NodeConn* conn);
+	
 	int Size();
+	NodeLink** begin();
+	NodeLink** end();
 
 	NodeLink* operator[](int pos);
 };
