@@ -18,7 +18,7 @@ void LinkVec::AddLink(NodeConn* start, NodeConn* end) {
 void LinkVec::RemoveLink(NodeLink* link) {
 	auto it = links.find(link);
 	delete *it;
-	links.erase(it); // need to delete link first !!!!!!!
+	links.erase(it);
 }
 
 void LinkVec::RemoveLinks(NodeConn* conn) {
@@ -41,6 +41,10 @@ ImVector<NodeLink*> LinkVec::GetLinks(NodeConn* conn) {
 	};
 	std::for_each(links.begin(), links.end(), add_link);
 	return conn_links;
+}
+
+int LinkVec::Size() {
+	return links.Size;
 }
 
 NodeLink* LinkVec::operator[](int pos) {
