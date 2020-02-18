@@ -7,10 +7,12 @@ LinkVec::LinkVec() {}
 LinkVec::~LinkVec() {}
 
 void LinkVec::AddLink(NodeLink* new_link) {
+	RemoveLinks(new_link->end);
 	links.push_back(new_link);
 }
 
 void LinkVec::AddLink(NodeConn* start, NodeConn* end) {
+	RemoveLinks(end);
 	NodeLink* new_link = new NodeLink(start, end);
 	links.push_back(new_link);
 }
@@ -45,6 +47,14 @@ ImVector<NodeLink*> LinkVec::GetLinks(NodeConn* conn) {
 
 int LinkVec::Size() {
 	return links.Size;
+}
+
+NodeLink** LinkVec::begin() {
+	return links.begin();
+}
+
+NodeLink** LinkVec::end() {
+	return links.end();
 }
 
 NodeLink* LinkVec::operator[](int pos) {

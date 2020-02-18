@@ -8,18 +8,10 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <sstream>
 
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
-
-static bool isConnectorHovered(ImVec2 con_pos, const float con_radius) {
-	ImVec2 mousePos = ImGui::GetIO().MousePos;
-
-	float xd = mousePos.x - con_pos.x;
-	float yd = mousePos.y - con_pos.y;
-
-	return ((xd * xd) + (yd * yd)) < (con_radius * con_radius);
-}
 
 void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	if (!ImGui::Begin("Node Graph Diagnostics", p_open)) {
@@ -29,7 +21,7 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	//ImGui::SetNextWindowSize(ImVec2(70, 50), ImGuiCond_FirstUseEver);
 	ImGui::Text("Node Graph Diagnostics Tool");
 	for (int i = 0; i < stats->size(); i++) {
-		ImGui::Text("%s", stats[i]);
+		ImGui::Text(stats->at(i).c_str());
 	}
 
 	ImGui::End();
@@ -41,9 +33,8 @@ void ShowNodeGraph(bool* p_open) {
 		ImGui::End();
 		return;
 	}
-	static bool diagnosticsWindow = true;
+	static bool diagnosticsWindow = false;
 	static std::vector<std::string> stats;
-	stats.push_back("wub");
 	if (diagnosticsWindow) ShowDiagnosticsWindow(&diagnosticsWindow, &stats);
 
 	static NodeVec nodes;
@@ -73,8 +64,7 @@ void ShowNodeGraph(bool* p_open) {
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
 	ImGui::Separator();
-	for (int node_id = 0; node_id < nodes.Size(); node_id++) {
-		Node* node = nodes[node_id];
+	for (Node* node : nodes) {
 		ImGui::PushID(node->id);
 		if (ImGui::Selectable(node->name, node->id == node_selected)) {
 			node_selected = node->id;
@@ -90,7 +80,6 @@ void ShowNodeGraph(bool* p_open) {
 	ImGui::SameLine();
 	ImGui::BeginGroup();
 
-	const float NODE_SLOT_RADIUS = 4.0f;
 	const ImVec2 NODE_WINDOW_PADDING(8.0f, 8.0f);
 
 	// Create child canvas
@@ -149,15 +138,15 @@ void ShowNodeGraph(bool* p_open) {
 	}
 
 	// Display nodes
-	for (int node_id = 0; node_id < nodes.Size(); node_id++) {
-		Node* node = nodes[node_id];
+	conn_hover = false;
+	for (Node* node : nodes) {
 		ImGui::PushID(node->id);
 		ImVec2 node_rect_min = offset + node->Pos();
 
 		// Draw links coming from output connections.
 		draw_list->ChannelsSetCurrent(0);
-		for (int i = 0; i < node->input_conns.Size; i++) {
-			ImVector<NodeLink*> conn_links = links.GetLinks(node->GetConn(i, Conn_Type::input));
+		for (NodeConn* conn : node->input_conns) {
+			ImVector<NodeLink*> conn_links = links.GetLinks(conn);
 			if (conn_links.Size > 0) {
 				ImVec2 p1 = offset + conn_links[0]->start->pos;
 				ImVec2 p2 = offset + conn_links[0]->end->pos;
@@ -189,30 +178,27 @@ void ShowNodeGraph(bool* p_open) {
 		}
 
 		// Track line from connector to mouse
-		conn_hover = false;
-		for (int j = 0; j < node->inputs_count; j++) {
-			NodeConn* conn = node->GetConn(j, Conn_Type::input);
-			ImVec2 conn_pos = offset + conn->pos;
-			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !conn_drag) {
+		for (NodeConn* conn : node->input_conns) {
+			bool tmp_conn_hover = conn->Hovered(offset);
+			if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
 				dragged_conn = conn;
 				conn_drag = true;
 				break;
 			}
-			else if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+			else if (tmp_conn_hover) {
 				hovered_conn = conn;
 				conn_hover = true;
 			}
 		}
 		
-		for (int j = 0; j < node->outputs_count; j++) {
-			NodeConn* conn = node->GetConn(j, Conn_Type::output);
-			ImVec2 conn_pos = offset + conn->pos;
-			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS) && ImGui::IsMouseDown(0) && !conn_drag) {
+		for (NodeConn* conn : node->output_conns) {
+			bool tmp_conn_hover = conn->Hovered(offset);
+			if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
 				dragged_conn = conn;
 				conn_drag = true;
 				break;
 			}
-			else if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+			else if (tmp_conn_hover) {
 				hovered_conn = conn;
 				conn_hover = true;
 			}
@@ -231,18 +217,18 @@ void ShowNodeGraph(bool* p_open) {
 		for (NodeConn* conn : node->input_conns) {
 			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
 			ImVec2 conn_pos = offset + conn->pos;
-			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+			if (conn->Hovered(offset)) {
 				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
-			draw_list->AddCircleFilled(conn_pos, NODE_SLOT_RADIUS, conn_colour);
+			draw_list->AddCircleFilled(conn_pos, conn->RADIUS, conn_colour);
 		}
 		for (NodeConn* conn : node->output_conns) {
 			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
 			ImVec2 conn_pos = offset + conn->pos;
-			if (isConnectorHovered(conn_pos, NODE_SLOT_RADIUS)) {
+			if (conn->Hovered(offset)) {
 				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
-			draw_list->AddCircleFilled(conn_pos, NODE_SLOT_RADIUS, conn_colour);
+			draw_list->AddCircleFilled(conn_pos, conn->RADIUS, conn_colour);
 		}
 
 		ImGui::PopID();
@@ -274,12 +260,10 @@ void ShowNodeGraph(bool* p_open) {
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
-				for (int i = 0; i < node->inputs_count; i++) {
-					NodeConn* conn = node->GetConn(i, Conn_Type::input);
+				for (NodeConn* conn : node->input_conns) {
 					links.RemoveLinks(conn);
 				}
-				for (int i = 0; i < node->outputs_count; i++) {
-					NodeConn* conn = node->GetConn(i, Conn_Type::output);
+				for (NodeConn* conn : node->output_conns) {
 					links.RemoveLinks(conn);
 				}
 				
@@ -306,13 +290,15 @@ void ShowNodeGraph(bool* p_open) {
 
 	// Update Diagnostics
 	stats.clear();
-	if (conn_drag) {
-		stats.push_back("Drag = TRUE");
+	if (conn_drag) stats.push_back("Drag = TRUE");
+	else stats.push_back("Drag = FALSE");
+	if (conn_hover) {
+		stats.push_back("Hover = TRUE");
+		std::stringstream ss;
+		ss << "(" << hovered_conn->pos.x << "," << hovered_conn->pos.y << ")";
+		stats.push_back(ss.str());
 	}
-	else {
-		stats.push_back("Drag = FALSE");
-	}
-	
+	else stats.push_back("Hover = FALSE");
 
 
 	ImGui::PopItemWidth();

@@ -16,7 +16,10 @@ public:
 	void AddNode(Node* new_node);
 	void RemoveNode(int id);
 	void RemoveNode(Node* node);
+	
 	int Size();
+	Node** begin();
+	Node** end();
 
 	Node* operator[](int pos);
 };
