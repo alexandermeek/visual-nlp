@@ -24,9 +24,7 @@ void NodeVec::RemoveNode(int id) {
 }
 
 void NodeVec::RemoveNode(Node* node) {
-	auto it = nodes.find(node);
-	delete* it;
-	nodes.erase(it);
+	nodes.find_erase(node);
 }
 
 int NodeVec::Size() {

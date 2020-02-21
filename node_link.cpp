@@ -1,6 +1,11 @@
 #include "node_link.h"
-#include <iostream>
 
-NodeLink::NodeLink(NodeConn* start, NodeConn* end) : start(start), end(end) {}
+NodeLink::NodeLink(NodeConn* start, NodeConn* end) : start(start), end(end) {
+	start->AddLink(this);
+	end->AddLink(this);
+}
 
-NodeLink::~NodeLink() {}
+NodeLink::~NodeLink() {
+	start->RemoveLink(this);
+	end->RemoveLink(this);
+}
