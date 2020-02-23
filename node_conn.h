@@ -15,13 +15,14 @@ private:
 public:
 	const float RADIUS = 4.0f;
 
-	ImVec2    pos;
 	int       slot_num;
 	Conn_Type type;
 	Node*     node;
 
-	NodeConn(Node* node, ImVec2 pos, int slot_num, Conn_Type type);
+	NodeConn(Node* node, int slot_num, Conn_Type type);
 	virtual ~NodeConn();
+
+	ImVec2 Pos();
 
 	void AddLink(NodeLink*);
 	void RemoveLink(NodeLink*);

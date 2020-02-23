@@ -13,10 +13,6 @@ private:
 	ImVec2 pos;
 	ImVec2 size;
 
-	ImVec2 GetInputSlotPos(int slot_num);
-	ImVec2 GetOutputSlotPos(int slot_num);
-
-	void UpdateConnPos();
 public:
 	int					id;
 	char				name[32];
@@ -27,6 +23,7 @@ public:
 	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();
 
+	ImVec2 GetSlotPos(int slot_num, Conn_Type type);
 	ImVec2 Pos();
 	ImVec2 Size();
 	void Resize(ImVec2);

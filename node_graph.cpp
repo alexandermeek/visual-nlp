@@ -114,10 +114,10 @@ void ShowNodeGraph(bool* p_open) {
 		ImVec2 p1, p2;
 		if (dragged_conn->type == Conn_Type::input) {
 			p1 = ImGui::GetIO().MousePos;
-			p2 = offset + dragged_conn->pos;
+			p2 = offset + dragged_conn->Pos();
 		}
 		else {
-			p1 = offset + dragged_conn->pos;
+			p1 = offset + dragged_conn->Pos();
 			p2 = ImGui::GetIO().MousePos;
 		}
 
@@ -146,8 +146,8 @@ void ShowNodeGraph(bool* p_open) {
 		for (NodeConn* conn : node->input_conns) {
 			ImVector<NodeLink*>* conn_links = conn->GetLinks();
 			if (conn_links->Size > 0) {
-				ImVec2 p1 = offset + conn_links->front()->start->pos;
-				ImVec2 p2 = offset + conn_links->front()->end->pos;
+				ImVec2 p1 = offset + conn_links->front()->start->Pos();
+				ImVec2 p2 = offset + conn_links->front()->end->Pos();
 				draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
 			}
 		}
@@ -214,7 +214,7 @@ void ShowNodeGraph(bool* p_open) {
 		draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
 		for (NodeConn* conn : node->input_conns) {
 			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 conn_pos = offset + conn->pos;
+			ImVec2 conn_pos = offset + conn->Pos();
 			if (conn->Hovered(offset)) {
 				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
@@ -222,7 +222,7 @@ void ShowNodeGraph(bool* p_open) {
 		}
 		for (NodeConn* conn : node->output_conns) {
 			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 conn_pos = offset + conn->pos;
+			ImVec2 conn_pos = offset + conn->Pos();
 			if (conn->Hovered(offset)) {
 				conn_colour = IM_COL32(175, 175, 175, 175);
 			}
@@ -287,14 +287,15 @@ void ShowNodeGraph(bool* p_open) {
 	if (conn_hover) {
 		stats.push_back("Hover = TRUE");
 		std::stringstream ss;
-		ss << "ConnPos(" << hovered_conn->pos.x << "," << hovered_conn->pos.y << ")";
+		ImVec2 conn_pos = hovered_conn->Pos();
+		ss << "ConnPos(" << conn_pos.x << "," << conn_pos.y << ")";
 		stats.push_back(ss.str());
 	}
 	else stats.push_back("Hover = FALSE");
 	{
-		ImVec2 wat = ImGui::GetIO().MousePos - offset;
+		ImVec2 mouse_pos = ImGui::GetIO().MousePos - offset;
 		std::stringstream ss;
-		ss << "RelMousePos(" << wat.x << "," << wat.y << ")";
+		ss << "RelMousePos(" << mouse_pos.x << "," << mouse_pos.y << ")";
 		stats.push_back(ss.str());
 	}
 	if (node_selected != -1) {
