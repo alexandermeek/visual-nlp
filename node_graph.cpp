@@ -9,9 +9,6 @@
 #include <string>
 #include <sstream>
 
-static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
-static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
-
 void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	if (!ImGui::Begin("Node Graph Diagnostics", p_open)) {
 		ImGui::End();
@@ -139,95 +136,24 @@ void ShowNodeGraph(bool* p_open) {
 	conn_hover = false;
 	for (Node* node : nodes) {
 		ImGui::PushID(node->id);
-		ImVec2 node_rect_min = offset + node->Pos();
 
-		// Draw links coming from output connections.
-		draw_list->ChannelsSetCurrent(0);
-		for (NodeConn* conn : node->input_conns) {
-			ImVector<NodeLink*>* conn_links = conn->GetLinks();
-			if (conn_links->Size > 0) {
-				ImVec2 p1 = offset + conn_links->front()->start->Pos();
-				ImVec2 p2 = offset + conn_links->front()->end->Pos();
-				draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
-			}
-		}
+		bool node_widgets_active = ImGui::IsAnyItemActive();
 
-		// Display node contents
-		draw_list->ChannelsSetCurrent(1); // Foreground
-		bool old_any_active = ImGui::IsAnyItemActive();
-		ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
-		ImGui::BeginGroup(); // Lock horizontal position
-		ImGui::Text("%s", node->name);
-		ImGui::Text("Node description...");
-		ImGui::EndGroup();
-
-		// Save the size of what we have emitted and wether any of the widgets are being used
-		bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
-		node->Resize(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
-		ImVec2 node_rect_max = node_rect_min + node->Size();
-
-		// Display node box
-		draw_list->ChannelsSetCurrent(0); // Background
-		ImGui::SetCursorScreenPos(node_rect_min);
-		ImGui::InvisibleButton("node", node->Size());
-		if (ImGui::IsItemHovered()) {
+		if (node->Hovered(offset)) {
 			node_hovered_in_scene = node->id;
-			open_context_menu |= ImGui::IsMouseClicked(1);
+			if (ImGui::IsMouseClicked(1)) open_context_menu = true;
 		}
 
-		// Track line from connector to mouse
-		for (NodeConn* conn : node->input_conns) {
-			bool tmp_conn_hover = conn->Hovered(offset);
-			if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
-				dragged_conn = conn;
-				conn_drag = true;
-				break;
-			}
-			else if (tmp_conn_hover) {
-				hovered_conn = conn;
-				conn_hover = true;
-			}
-		}
-		
-		for (NodeConn* conn : node->output_conns) {
-			bool tmp_conn_hover = conn->Hovered(offset);
-			if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
-				dragged_conn = conn;
-				conn_drag = true;
-				break;
-			}
-			else if (tmp_conn_hover) {
-				hovered_conn = conn;
-				conn_hover = true;
-			}
-		}
+		bool node_hovered = (node_hovered_in_list == node->id || node_hovered_in_scene == node->id || (node_hovered_in_list == -1 && node_selected == node->id));
+		node->Draw(draw_list, offset, node_hovered);
 
 		bool node_moving_active = ImGui::IsItemActive();
-
 		if (node_widgets_active || node_moving_active)
 			node_selected = node->id;
 		if (node_moving_active && ImGui::IsMouseDragging(0) && !conn_hover && !conn_drag)
 			node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
 
-		ImU32 node_bg_color = (node_hovered_in_list == node->id || node_hovered_in_scene == node->id || (node_hovered_in_list == -1 && node_selected == node->id)) ? IM_COL32(75, 75, 75, 255) : IM_COL32(60, 60, 60, 255);
-		draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
-		draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
-		for (NodeConn* conn : node->input_conns) {
-			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 conn_pos = offset + conn->Pos();
-			if (conn->Hovered(offset)) {
-				conn_colour = IM_COL32(175, 175, 175, 175);
-			}
-			draw_list->AddCircleFilled(conn_pos, conn->RADIUS, conn_colour);
-		}
-		for (NodeConn* conn : node->output_conns) {
-			ImU32 conn_colour = IM_COL32(150, 150, 150, 150);
-			ImVec2 conn_pos = offset + conn->Pos();
-			if (conn->Hovered(offset)) {
-				conn_colour = IM_COL32(175, 175, 175, 175);
-			}
-			draw_list->AddCircleFilled(conn_pos, conn->RADIUS, conn_colour);
-		}
+		node->CheckConns(offset, conn_hover, hovered_conn, conn_drag, dragged_conn);
 
 		ImGui::PopID();
 	}

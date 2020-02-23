@@ -47,3 +47,20 @@ bool NodeConn::Hovered(ImVec2 offset) {
 
 	return ((xd * xd) + (yd * yd)) < (RADIUS * RADIUS);
 }
+
+void NodeConn::Draw(ImDrawList* draw_list, ImVec2 offset) {
+	ImU32 conn_colour = COLOUR;
+	ImVec2 conn_pos = offset + Pos();
+
+	if (Hovered(offset)) {
+		conn_colour = IM_COL32(175, 175, 175, 175);
+	}
+
+	draw_list->ChannelsSetCurrent(1);
+	draw_list->AddCircleFilled(conn_pos, RADIUS, conn_colour);
+
+	// Draw node links, if this connector is an input conn.
+	if (type == Conn_Type::input && links.size() > 0) {
+		links.front()->Draw(draw_list, offset);
+	}
+}

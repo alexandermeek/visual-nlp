@@ -8,11 +8,12 @@
 
 class Node {
 private:
+	const ImVec2 NODE_WINDOW_PADDING = ImVec2(8.0f, 8.0f);
+
 	static int	next_id;
 
 	ImVec2 pos;
 	ImVec2 size;
-
 public:
 	int					id;
 	char				name[32];
@@ -28,7 +29,11 @@ public:
 	ImVec2 Size();
 	void Resize(ImVec2);
 	void Move(ImVec2 new_pos);
+	bool Hovered(ImVec2 offset);
 
 	NodeConn* GetConn(int slot_num, Conn_Type type);
+
+	void Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered);
+	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn);
 };
 #endif //NODE_H
