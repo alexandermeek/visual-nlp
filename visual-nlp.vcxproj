@@ -88,6 +88,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,6 +136,7 @@
     <ClCompile Include="imgui_node_graph_test.cpp" />
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="module.cpp" />
     <ClCompile Include="node.cpp" />
     <ClCompile Include="node_conn.cpp" />
     <ClCompile Include="node_graph.cpp" />
@@ -150,6 +152,7 @@
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
+    <ClInclude Include="module.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="node_conn.h" />
     <ClInclude Include="node_link.h" />

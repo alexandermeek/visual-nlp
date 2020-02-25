@@ -23,11 +23,11 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	ImGui::End();
 }
 
-void ShowNodeGraph(bool* p_open) {
+NodeVec* ShowNodeGraph(bool* p_open) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
 		ImGui::End();
-		return;
+		return nullptr;
 	}
 	static bool diagnosticsWindow = true;
 	static std::vector<std::string> stats;
@@ -102,12 +102,12 @@ void ShowNodeGraph(bool* p_open) {
 			draw_list->AddLine(ImVec2(0.0f, y) + win_pos, ImVec2(canvas_size.x, y) + win_pos, GRID_COLOUR);
 	}
 
-	// Split frame into two layers, one for links, and one for nodes.
-	draw_list->ChannelsSplit(2);
+	// Split frame into three layers, one for links, and two for nodes.
+	draw_list->ChannelsSplit(3);
 
 	// Draw links to mouse
 	if (conn_drag && ImGui::IsMouseDown(0)) {
-		draw_list->ChannelsSetCurrent(1);
+		draw_list->ChannelsSetCurrent(2);
 		ImVec2 p1, p2;
 		if (dragged_conn->type == Conn_Type::input) {
 			p1 = ImGui::GetIO().MousePos;
@@ -238,5 +238,6 @@ void ShowNodeGraph(bool* p_open) {
 	ImGui::EndGroup();
 
 	ImGui::End();
+	return &nodes;
 }
 

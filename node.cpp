@@ -96,7 +96,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImVec2 node_rect_min = offset + pos;
 	ImVec2 node_rect_max = node_rect_min + size;
 
-	draw_list->ChannelsSetCurrent(1); // Foreground
+	draw_list->ChannelsSetCurrent(2); // Foreground
 
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
@@ -106,7 +106,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 
 	Resize(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
 
-	draw_list->ChannelsSetCurrent(0); // Background
+	draw_list->ChannelsSetCurrent(1); // Background
 	draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
 	draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
 
