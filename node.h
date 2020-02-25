@@ -4,22 +4,26 @@
 #include "imgui.h"
 #include "node_conn.h"
 #include "node_link.h"
+#include "module.h"
+
 #include <vector>
 
 class Node {
 private:
-	const ImVec2 NODE_WINDOW_PADDING = ImVec2(8.0f, 8.0f);
+	const ImVec2		NODE_WINDOW_PADDING = ImVec2(8.0f, 8.0f);
 
-	static int	next_id;
+	static int			next_id;
 
-	ImVec2 pos;
-	ImVec2 size;
+	ImVec2				pos;
+	ImVec2				size;
 public:
 	int					id;
 	char				name[32];
 	int					inputs_count, outputs_count;
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
+
+	Module				module;
 
 	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();

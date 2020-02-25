@@ -1,6 +1,8 @@
 // dear imgui: standalone example application for DirectX 9
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
+#include "node_vec.h"
+
 #include "imgui.h"
 #include "imgui_impl_dx9.h"
 #include "imgui_impl_win32.h"
@@ -16,7 +18,7 @@ static D3DPRESENT_PARAMETERS    g_d3dpp = {};
 
 // Forward declarations of helper functions
 void ShowAppMainMenuBar(bool* show_node_graph, bool* show_demo_window, bool* show_graph_window, bool* show_nodes_window);
-void ShowNodeGraph(bool* p_open);
+NodeVec* ShowNodeGraph(bool* p_open);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void ResetDevice();
@@ -72,6 +74,9 @@ int main(int, char**)
 	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != NULL);
 
+	// Pointers to data
+	NodeVec* nodes;
+
 	// Our state
 	bool show_node_graph = false;
 	bool show_demo_window = false;
@@ -114,7 +119,7 @@ int main(int, char**)
 			ImGui::ShowExampleAppCustomNodeGraph2(&show_nodes_window);
 
 		if (show_node_graph)
-			ShowNodeGraph(&show_node_graph);
+			nodes = ShowNodeGraph(&show_node_graph);
 
 		// Rendering
 		ImGui::EndFrame();

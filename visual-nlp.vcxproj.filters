@@ -60,6 +60,9 @@
     <ClCompile Include="node_vec.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imconfig.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="node_vec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

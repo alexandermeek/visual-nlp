@@ -56,7 +56,7 @@ void NodeConn::Draw(ImDrawList* draw_list, ImVec2 offset) {
 		conn_colour = IM_COL32(175, 175, 175, 175);
 	}
 
-	draw_list->ChannelsSetCurrent(1);
+	draw_list->ChannelsSetCurrent(2);
 	draw_list->AddCircleFilled(conn_pos, RADIUS, conn_colour);
 
 	// Draw node links, if this connector is an input conn.
