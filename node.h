@@ -23,7 +23,7 @@ public:
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
 
-	Module				module;
+	Module*				module;
 
 	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();
