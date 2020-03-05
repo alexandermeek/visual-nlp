@@ -1,5 +1,7 @@
+build/
 out/
 imgui.ini
+.vscode/
 
 ## C++ files
 # Prerequisites

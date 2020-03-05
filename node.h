@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 #pragma once
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "node_conn.h"
 #include "node_link.h"
 #include "module.h"

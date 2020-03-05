@@ -7,11 +7,11 @@ Module::Module(const char* name, Mod_Type type) : type(type) {
 Module::~Module() {}
 
 int Module::NumParams() {
-	return param_types.size();
+	return (int)param_types.size();
 }
 
 int Module::NumReturns() {
-	return return_types.size();
+	return (int)return_types.size();
 }
 
 std::string Module::Param(int pos) {
