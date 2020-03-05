@@ -2,8 +2,13 @@
 #define MODULE_H
 #pragma once
 
+#include "pybind11/pybind11.h"
+#include "pybind11/embed.h"
+
 #include <vector>
 #include <string>
+
+namespace py = pybind11;
 
 enum class Mod_Type { python };
 
@@ -23,6 +28,8 @@ public:
 	std::vector<std::string>* Params();
 	std::string Return(int pos);
 	std::vector<std::string>* Returns();
+
+	void Run();
 };
 #endif // MODULE_H
 
