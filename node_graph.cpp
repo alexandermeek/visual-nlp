@@ -2,6 +2,7 @@
 #include "node.h"
 #include "node_link.h"
 #include "node_vec.h"
+#include "module.h"
 
 #include <math.h> // fmodf
 #include <iostream>
@@ -45,6 +46,9 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 		nodes.AddNode(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
 		NodeLink* link = new NodeLink(nodes[0]->GetConn(0, Conn_Type::output), nodes[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
+
+		Module m("test", Mod_Type::python);
+		m.Run();
 	}
 
 	bool open_context_menu = false;

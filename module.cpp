@@ -29,3 +29,14 @@ std::string Module::Return(int pos) {
 std::vector<std::string>* Module::Returns() {
 	return &return_types;
 }
+
+void Module::Run() {
+	py::scoped_interpreter guard{};
+	
+	py::module script = py::module::import("scripts.script");
+	py::object result = script.attr("Run")();
+	
+
+	
+	//py::exec("print('Hello world')");
+}
