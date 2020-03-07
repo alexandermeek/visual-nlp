@@ -44,7 +44,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		NodeLink* link = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 
-		Module m("test", Mod_Type::python);
+		Module m("Run", "script", Mod_Type::python);
 		m.Run();
 	}
 
