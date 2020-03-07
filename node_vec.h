@@ -5,6 +5,8 @@
 #include "node.h"
 #include "imgui/imgui.h"
 
+#include <algorithm>
+
 class NodeVec {
 private:
 	ImVector<Node*> nodes;

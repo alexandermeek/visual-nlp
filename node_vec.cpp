@@ -2,7 +2,9 @@
 
 NodeVec::NodeVec() {}
 
-NodeVec::~NodeVec() {}
+NodeVec::~NodeVec() {
+	std::for_each(nodes.begin(), nodes.end(), [](Node* node) {delete node;});
+}
 
 Node* NodeVec::GetNode(int id) {
 	for (int i = 0; i < nodes.Size; i++) {
