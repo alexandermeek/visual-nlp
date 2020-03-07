@@ -4,7 +4,7 @@
 int Node::next_id = 0;
 
 Node::Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count)
-	: pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count) {
+	: pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count), module(nullptr) {
 	this->id = next_id++;
 	strncpy_s(this->name, name, 31);
 	this->name[31] = 0;

@@ -1,7 +1,8 @@
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "node.h"
 #include "node_link.h"
 #include "node_vec.h"
+#include "module.h"
 
 #include <math.h> // fmodf
 #include <iostream>
@@ -23,17 +24,14 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	ImGui::End();
 }
 
-NodeVec* ShowNodeGraph(bool* p_open) {
+void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
 		ImGui::End();
-		return nullptr;
 	}
-	static bool diagnosticsWindow = true;
-	static std::vector<std::string> stats;
-	if (diagnosticsWindow) ShowDiagnosticsWindow(&diagnosticsWindow, &stats);
 
-	static NodeVec nodes;
+	static std::vector<std::string> stats;
+	if (*debug) ShowDiagnosticsWindow(debug, &stats);
 
 	static bool initialised = false;
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
@@ -41,10 +39,13 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 	static int node_selected = -1;
 
 	if (!initialised) {
-		nodes.AddNode(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes.AddNode(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
-		NodeLink* link = new NodeLink(nodes[0]->GetConn(0, Conn_Type::output), nodes[1]->GetConn(0, Conn_Type::input));
+		nodes->AddNode(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		nodes->AddNode(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
+		NodeLink* link = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
+
+		Module m("test", Mod_Type::python);
+		m.Run();
 	}
 
 	bool open_context_menu = false;
@@ -59,7 +60,7 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
 	ImGui::Separator();
-	for (Node* node : nodes) {
+	for (Node* node : (*nodes)) {
 		ImGui::PushID(node->id);
 		if (ImGui::Selectable(node->name, node->id == node_selected)) {
 			node_selected = node->id;
@@ -134,7 +135,7 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 
 	// Display nodes
 	conn_hover = false;
-	for (Node* node : nodes) {
+	for (Node* node : (*nodes)) {
 		ImGui::PushID(node->id);
 
 		bool node_widgets_active = ImGui::IsAnyItemActive();
@@ -178,14 +179,14 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 	// Draw context menu
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 	if (ImGui::BeginPopup("context_menu")) {
-		Node* node = nodes.GetNode(node_selected);
+		Node* node = nodes->GetNode(node_selected);
 		ImVec2 scene_pos = ImGui::GetMousePosOnOpeningCurrentPopup() - offset;
 		if (node) {
 			ImGui::Text("Node '%s'", node->name);
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
-				nodes.RemoveNode(node_selected);
+				nodes->RemoveNode(node_selected);
 				node_selected = -1;
 				dragged_conn = nullptr;
 				hovered_conn = nullptr;
@@ -194,7 +195,7 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
-				nodes.AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
+				nodes->AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}
@@ -225,7 +226,7 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 		stats.push_back(ss.str());
 	}
 	if (node_selected != -1) {
-		Node* node = nodes.GetNode(node_selected);
+		Node* node = nodes->GetNode(node_selected);
 		std::stringstream ss;
 		ss << "NodeSize(" << node->Size().x << "," << node->Size().y << ")";
 		stats.push_back(ss.str());
@@ -238,6 +239,5 @@ NodeVec* ShowNodeGraph(bool* p_open) {
 	ImGui::EndGroup();
 
 	ImGui::End();
-	return &nodes;
 }
 

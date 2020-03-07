@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 #pragma once
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "node_conn.h"
 #include "node_link.h"
 #include "module.h"
@@ -23,7 +23,7 @@ public:
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
 
-	Module				module;
+	Module*				module;
 
 	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();

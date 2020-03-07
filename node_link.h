@@ -1,7 +1,7 @@
 #ifndef NODELINK_H
 #define NODELINK_H
 #pragma once
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "node_conn.h"
 
 class NodeLink {

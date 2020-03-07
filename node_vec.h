@@ -3,7 +3,9 @@
 #pragma once
 
 #include "node.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
+
+#include <algorithm>
 
 class NodeVec {
 private:
