@@ -1,7 +1,8 @@
 #include "module.h"
 
-Module::Module(const char* name, Mod_Type type) : type(type) {
+Module::Module(const char* name, const char* script_file, Mod_Type type) : type(type) {
 	strncpy_s(this->name, name, 31);
+	strncpy_s(this->script_file, script_file, 99);
 }
 
 Module::~Module() {}
@@ -33,8 +34,11 @@ std::vector<std::string>* Module::Returns() {
 void Module::Run() {
 	py::scoped_interpreter guard{};
 	
-	py::module script = py::module::import("scripts.script");
-	py::object result = script.attr("Run")();
+	std::stringstream module;
+	module << SCRIPT_DIR << "." << script_file;
+
+	py::module script = py::module::import(module.str().c_str());
+	py::object result = script.attr(name)();
 	
 
 	
