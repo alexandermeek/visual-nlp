@@ -2,7 +2,8 @@
 #define MODULE_H
 #pragma once
 
-#include "pybind11/embed.h"
+#include <pybind11/embed.h>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <sstream>
 
 namespace py = pybind11;
+using json = nlohmann::json;
 
 enum class Mod_Type { python };
 
@@ -18,8 +20,9 @@ class Module {
 private:
 	const char SCRIPT_DIR[100] = "scripts";
 
-	std::vector<std::string> param_types;
-	std::vector<std::string> return_types;
+	json results;
+
+	std::vector<json::value_t> param_types;
 public:
 	char name[32];
 	char script_file[100];
@@ -30,12 +33,12 @@ public:
 
 	int NumParams();
 	int NumReturns();
-	std::string Param(int pos);
-	std::vector<std::string>* Params();
-	std::string Return(int pos);
-	std::vector<std::string>* Returns();
+	json::value_t Param(int pos);
+	std::vector<json::value_t> Params();
+	json::value_t Return(int pos);
+	std::vector<json::value_t> Returns();
 
-	void Run();
+	void Run(json parameters);
 };
 #endif // MODULE_H
 
