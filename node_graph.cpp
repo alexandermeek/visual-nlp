@@ -45,7 +45,9 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		initialised = true;
 
 		Module m("Run", "script", Mod_Type::python);
-		m.Run();
+#include <nlohmann/json.hpp>
+		nlohmann::json j = "[1, 2, 3]"_json;
+		m.Run(j);
 	}
 
 	bool open_context_menu = false;
