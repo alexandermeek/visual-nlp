@@ -3,7 +3,8 @@
 #pragma once
 
 #include "node.h"
-#include "imgui/imgui.h"
+
+#include <imgui/imgui.h>
 
 #include <algorithm>
 
