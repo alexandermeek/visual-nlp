@@ -16,7 +16,7 @@ namespace py = pybind11;
 using json = nlohmann::json;
 
 class Module {
-private:
+protected:
 	const std::string SCRIPT_DIR = "scripts";
 
 	std::string script_file;
@@ -27,27 +27,23 @@ private:
 	std::vector<json::value_t> return_types;
 
 	json* results;
-
-	void ReadScriptHeader();
-	std::vector<std::string> ParseLine(std::string line);
-	json::value_t ParseType(std::string type);
 public:
 	Module(const std::string name, const std::string script_file);
 	virtual ~Module();
 
-	std::string FunctionName();
-	std::string ScriptFile();
-	int NumParams();
-	int NumReturns();
-	const std::vector<std::string>* ParamNames();
-	const std::vector<json::value_t>* ParamTypes();
-	const std::vector<json::value_t>* ReturnTypes();
+	virtual std::string FunctionName();
+	virtual std::string ScriptFile();
+	virtual int NumParams();
+	virtual int NumReturns();
+	virtual const std::vector<std::string>* ParamNames();
+	virtual const std::vector<json::value_t>* ParamTypes();
+	virtual const std::vector<json::value_t>* ReturnTypes();
 
-	json* Results();
-	std::vector<json::value_t> ResultTypes();
+	virtual json* Results();
+	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
 
-	void Run(json* parameters);
+	virtual void Run(json* parameters) = 0;
 };
 #endif // MODULE_H
 
