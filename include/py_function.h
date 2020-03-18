@@ -13,12 +13,12 @@ using json = nlohmann::json;
 
 class PyFunction {
 private:
-	char script_file[100];
-	char function_name[32];
+	std::string script_file;
+	std::string function_name;
 public:
-	PyFunction(const char* script_file, const char* function_name);
+	PyFunction(const std::string script_file, const std::string function_name);
 	~PyFunction();
 
-	json* Run(json* args);
+	json* Call(json* args);
 };
 #endif // PYFUNCTION_H

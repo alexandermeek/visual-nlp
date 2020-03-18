@@ -3,11 +3,9 @@
 #include <iostream>
 int Node::next_id = 0;
 
-Node::Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count)
-	: pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count), module(nullptr) {
+Node::Node(const std::string name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count)
+	: name(name), pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count), module(nullptr) {
 	this->id = next_id++;
-	strncpy_s(this->name, name, 31);
-	this->name[31] = 0;
 
 	for (int i = 0; i < inputs_count; i++) {
 		NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
@@ -100,7 +98,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
-	ImGui::Text("%s", name);
+	ImGui::Text("%s", name.c_str());
 	ImGui::Text("Node description...");
 	ImGui::EndGroup();
 
@@ -147,4 +145,8 @@ void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, 
 			conn_hover = true;
 		}
 	}
+}
+
+void Node::Run() {
+	//module->Run(args);
 }

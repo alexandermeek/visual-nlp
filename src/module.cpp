@@ -1,11 +1,19 @@
 #include "module.h"
 
-Module::Module(const char* name, const char* script_file, Mod_Type type) : type(type) {
-	strncpy_s(this->name, name, 31);
-	strncpy_s(this->script_file, script_file, 99);
+Module::Module(const std::string name, const std::string script_file, Mod_Type type)
+	: name(name), script_file(script_file), type(type) {}
+
+Module::~Module() {
+	delete results;
 }
 
-Module::~Module() {}
+std::string Module::Name() {
+	return name;
+}
+
+std::string Module::ScriptFile() {
+	return script_file;
+}
 
 int Module::NumParams() {
 	return (int)param_types.size();
@@ -47,7 +55,7 @@ void Module::Run(json* parameters) {
 
 	PyFunction f(script_path.str().c_str(), name);
 
-	results = f.Run(parameters);
+	results = f.Call(parameters);
 
 	// debug purposes:
 	std::cout << results->dump(4) << std::endl;

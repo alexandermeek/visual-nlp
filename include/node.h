@@ -9,6 +9,7 @@
 #include <imgui/imgui.h>
 
 #include <vector>
+#include <string>
 
 class Node {
 private:
@@ -20,14 +21,14 @@ private:
 	ImVec2				size;
 public:
 	int					id;
-	char				name[32];
+	std::string			name;
 	int					inputs_count, outputs_count;
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
 
 	Module*				module;
 
-	Node(const char* name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
+	Node(const std::string name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
 	virtual ~Node();
 
 	ImVec2 GetSlotPos(int slot_num, Conn_Type type);
@@ -41,5 +42,7 @@ public:
 
 	void Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered);
 	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn);
+
+	void Run();
 };
 #endif //NODE_H

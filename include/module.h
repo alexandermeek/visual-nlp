@@ -20,17 +20,19 @@ class Module {
 private:
 	const char SCRIPT_DIR[100] = "scripts";
 
+	std::string name;
+	std::string script_file;
+	Mod_Type type;
+
 	json* results;
 
 	std::vector<json::value_t> param_types;
 public:
-	char name[32];
-	char script_file[100];
-	Mod_Type type;
-
-	Module(const char* name, const char* script_file, Mod_Type type);
+	Module(const std::string name, const std::string script_file, Mod_Type type);
 	virtual ~Module();
 
+	std::string Name();
+	std::string ScriptFile();
 	int NumParams();
 	int NumReturns();
 	json::value_t Param(int pos);

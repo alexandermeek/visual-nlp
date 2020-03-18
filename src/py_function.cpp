@@ -1,17 +1,15 @@
 #include "py_function.h"
 
-PyFunction::PyFunction(const char* script_file, const char* function_name) {
-	strncpy_s(this->script_file, script_file, 99);
-	strncpy_s(this->function_name, function_name, 31);
-}
+PyFunction::PyFunction(const std::string script_file, const std::string function_name)
+	: script_file(script_file), function_name(function_name) {}
 
 PyFunction::~PyFunction() {}
 
-json* PyFunction::Run(json* args) {
+json* PyFunction::Call(json* args) {
 	py::scoped_interpreter guard{};
 
 	py::module py_json = py::module::import("json"); // import python json package
-	py::function f = py::module::import(script_file).attr(function_name); // import function with in script file and module name
+	py::function f = py::module::import(script_file.c_str()).attr(function_name.c_str()); // import function with in script file and module name
 
 	py::object py_args;
 	if (!args->empty()) {
