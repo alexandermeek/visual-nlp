@@ -2,6 +2,7 @@
 #include "node_link.h"
 #include "node_vec.h"
 #include "module.h"
+#include "module_py.h"
 
 #include <imgui/imgui.h>
 
@@ -45,7 +46,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		NodeLink* link = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 
-		Module m("Run", "script");
+		ModulePy m("Run", "script");
 #include <nlohmann/json.hpp>
 		nlohmann::json j = "[2, true, 3.5]"_json;
 		m.Run(&j);
@@ -202,7 +203,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		Node* node = nodes->GetNode(node_selected);
 		ImVec2 scene_pos = ImGui::GetMousePosOnOpeningCurrentPopup() - offset;
 		if (node) {
-			ImGui::Text("Node '%s'", node->name);
+			ImGui::Text("Node '%s'", node->name.c_str());
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
