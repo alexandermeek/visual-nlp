@@ -2,43 +2,48 @@
 #define MODULE_H
 #pragma once
 
-#include "py_function.h"
-
 #include <nlohmann/json.hpp>
+#include <pybind11/embed.h>
 
+#include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cctype>
 #include <sstream>
 
 namespace py = pybind11;
 using json = nlohmann::json;
 
-enum class Mod_Type { python };
-
 class Module {
 private:
-	const char SCRIPT_DIR[100] = "scripts";
+	const std::string SCRIPT_DIR = "scripts";
 
-	std::string name;
 	std::string script_file;
-	Mod_Type type;
+	std::string function_name;
+
+	std::vector<std::string> param_names;
+	std::vector<json::value_t> param_types;
+	std::vector<json::value_t> return_types;
 
 	json* results;
 
-	std::vector<json::value_t> param_types;
+	void ReadScriptHeader();
+	std::vector<std::string> ParseLine(std::string line);
+	json::value_t ParseType(std::string type);
 public:
-	Module(const std::string name, const std::string script_file, Mod_Type type);
+	Module(const std::string name, const std::string script_file);
 	virtual ~Module();
 
-	std::string Name();
+	std::string FunctionName();
 	std::string ScriptFile();
 	int NumParams();
 	int NumReturns();
-	json::value_t Param(int pos);
-	std::vector<json::value_t> Params();
-	json::value_t Return(int pos);
-	std::vector<json::value_t> Returns();
+	const std::vector<std::string>* ParamNames();
+	const std::vector<json::value_t>* ParamTypes();
+	const std::vector<json::value_t>* ReturnTypes();
+
+	json* Results();
 
 	void Run(json* parameters);
 };
