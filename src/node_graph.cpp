@@ -65,7 +65,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::Separator();
 	for (Node* node : (*nodes)) {
 		ImGui::PushID(node->id);
-		if (ImGui::Selectable(node->name, node->id == node_selected)) {
+		if (ImGui::Selectable(node->name.c_str(), node->id == node_selected)) {
 			node_selected = node->id;
 		}
 		if (ImGui::IsItemHovered()) {
