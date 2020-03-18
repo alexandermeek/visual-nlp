@@ -45,10 +45,17 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		NodeLink* link = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[1]->GetConn(0, Conn_Type::input));
 		initialised = true;
 
-		Module m("Run", "script", Mod_Type::python);
+		Module m("Run", "script");
 #include <nlohmann/json.hpp>
-		nlohmann::json j = "[1, 2, 3]"_json;
+		nlohmann::json j = "[2, true, 3]"_json;
+		
+		const std::vector<std::string>* names = m.ParamNames();
+		for (std::string n : *names) {
+			std::cout << n << " ";
+		}
+
 		m.Run(&j);
+		std::cout << m.Results()->dump(4);
 	}
 
 	bool open_context_menu = false;
