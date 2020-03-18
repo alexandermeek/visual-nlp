@@ -47,15 +47,25 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 		Module m("Run", "script");
 #include <nlohmann/json.hpp>
-		nlohmann::json j = "[2, true, 3]"_json;
-		
+		nlohmann::json j = "[2, true, 3.5]"_json;
+		m.Run(&j);
+		std::cout << m.Results()->dump(4) << std::endl;
 		const std::vector<std::string>* names = m.ParamNames();
 		for (std::string n : *names) {
 			std::cout << n << " ";
 		}
-
-		m.Run(&j);
-		std::cout << m.Results()->dump(4);
+		std::cout << std::endl;
+		const std::vector<json::value_t>* r_types = m.ReturnTypes();
+		for (json::value_t t : *r_types) {
+			std::cout << (int)t << " ";
+		}
+		std::cout << std::endl;
+		const std::vector<json::value_t> res_types = m.ResultTypes();
+		for (json::value_t r_t : res_types) {
+			std::cout << (int)r_t << " ";
+		}
+		std::cout << std::endl;
+		std::cout << (*m.ReturnTypes() == m.ResultTypes()) << std::endl;
 	}
 
 	bool open_context_menu = false;

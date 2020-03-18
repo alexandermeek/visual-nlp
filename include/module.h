@@ -44,6 +44,8 @@ public:
 	const std::vector<json::value_t>* ReturnTypes();
 
 	json* Results();
+	std::vector<json::value_t> ResultTypes();
+	void ClearResults();
 
 	void Run(json* parameters);
 };

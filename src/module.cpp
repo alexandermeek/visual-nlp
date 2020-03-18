@@ -2,6 +2,7 @@
 
 Module::Module(const std::string function_name, const std::string script_file)
 	: function_name(function_name), script_file(script_file), results(nullptr) {
+	
 	ReadScriptHeader();
 }
 
@@ -10,8 +11,12 @@ Module::~Module() {
 }
 
 void Module::ReadScriptHeader() {
+	std::stringstream script_path;
+	script_path << SCRIPT_DIR << "/" << script_file << ".py";
+
+	
 	std::ifstream f;
-	f.open(script_file.c_str());
+	f.open(script_path.str().c_str());
 	if (f.is_open()) {
 		std::string params_line, return_line;
 		getline(f, params_line);
@@ -26,14 +31,14 @@ void Module::ReadScriptHeader() {
 
 		for (std::string param : params_str) {
 			std::string name = param.substr(0, param.find('='));
-			std::string type = param.substr(name.size(), param.size());
+			std::string type = param.substr(name.size() + 1, param.size());
 
 			param_names.push_back(name);
 			param_types.push_back(ParseType(type));
 		}
 
-		for (std::string return_ : return_str) {
-			return_types.push_back(ParseType(return_));
+		for (std::string return_t : return_str) {
+			return_types.push_back(ParseType(return_t));
 		}
 	}
 }
@@ -48,7 +53,7 @@ std::vector<std::string> Module::ParseLine(std::string line) {
 	std::string delimiter = ",";
 
 	// Ignore starting characters
-	line = line.substr(line.find(start_sym), line.size());
+	line = line.substr(line.find(start_sym) + 1, line.size());
 
 	// Loop through any found tokens and add to result
 	std::vector<std::string> tokens;
@@ -57,6 +62,7 @@ std::vector<std::string> Module::ParseLine(std::string line) {
 		tokens.push_back(line.substr(0, pos));
 		line.erase(0, pos + delimiter.length());
 	}
+	tokens.push_back(line);
 	return tokens;
 }
 
@@ -114,6 +120,25 @@ const std::vector<json::value_t>* Module::ReturnTypes() {
 
 json* Module::Results() {
 	return results;
+}
+
+std::vector<json::value_t> Module::ResultTypes() {
+	std::vector<json::value_t> result_types;
+	if (results != nullptr && !results->empty()) {
+		if (return_types.size() <= 1) {
+			result_types.push_back(results->type());
+		}
+		else {
+			for (int i = 0; i < results->size(); i++) {
+				result_types.push_back(results[i].type());
+			}
+		}
+	}
+	return result_types;
+}
+
+void Module::ClearResults() {
+
 }
 
 void Module::Run(json* parameters) {
