@@ -76,7 +76,7 @@ json::value_t ModulePy::ParseType(std::string type) {
 	else if (type == "string") {
 		return json::value_t::string;
 	}
-	else if (type == "boolean") {
+	else if (type == "bool") {
 		return json::value_t::boolean;
 	}
 	else if (type == "int") {

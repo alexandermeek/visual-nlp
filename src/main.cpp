@@ -52,7 +52,8 @@ int main(int, char**)
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
 	// Setup Dear ImGui style
-	ImGui::StyleColorsLight();
+	//ImGui::StyleColorsLight();
+	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 
 	// Setup Platform/Renderer bindings
@@ -83,7 +84,7 @@ int main(int, char**)
 	bool show_demo_window = false;
 	bool show_graph_window = false;
 	bool show_nodes_window = false;
-	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImVec4 clear_color = ImVec4(0.25f, 0.4f, 0.55f, 1.00f);
 
 	// Main loop
 	MSG msg;

@@ -53,7 +53,7 @@ void NodeConn::Draw(ImDrawList* draw_list, ImVec2 offset) {
 	ImVec2 conn_pos = offset + Pos();
 
 	if (Hovered(offset)) {
-		conn_colour = IM_COL32(175, 175, 175, 175);
+		conn_colour = HOVER_COLOUR;
 	}
 
 	draw_list->ChannelsSetCurrent(2);

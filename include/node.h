@@ -15,6 +15,8 @@
 class Node {
 private:
 	const ImVec2		NODE_WINDOW_PADDING = ImVec2(8.0f, 8.0f);
+	const ImU32			HOVER_BG_COL = IM_COL32(40, 40, 40, 255);
+	const ImU32			BG_COL = IM_COL32(48, 48, 48, 255);
 
 	static int			next_id;
 

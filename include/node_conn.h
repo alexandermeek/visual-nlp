@@ -18,8 +18,8 @@ class NodeConn {
 private:
 	std::vector<NodeLink*> links;
 	const float RADIUS = 4.0f;
-	const ImU32 COLOUR = IM_COL32(150, 150, 150, 150);
-	const ImU32 HOVER_COLOUR = IM_COL32(175, 175, 175, 175);
+	const ImU32 COLOUR = IM_COL32(255, 153, 0, 255);
+	const ImU32 HOVER_COLOUR = IM_COL32(204, 122, 0, 255);
 public:
 	int       slot_num;
 	Conn_Type type;

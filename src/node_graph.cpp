@@ -78,6 +78,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::BeginGroup();
 
 	const ImVec2 NODE_WINDOW_PADDING(8.0f, 8.0f);
+	const ImU32 CANVAS_BG_COL = IM_COL32(24, 24, 24, 255);
 
 	// Create child canvas
 	ImGui::Text("Hold middle mouse button to scroll (%.2f,%.2f)", scrolling.x, scrolling.y);
@@ -85,7 +86,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::Checkbox("Show grid", &show_grid);
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, IM_COL32(60, 60, 70, 200));
+	ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, CANVAS_BG_COL);
 	ImGui::BeginChild("scrolling_region", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 	ImGui::PushItemWidth(120.0f);
 
@@ -120,7 +121,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			p2 = ImGui::GetIO().MousePos;
 		}
 
-		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
+		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(255, 153, 0, 255), 3.0f);
 	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
 		if (dragged_conn->node != hovered_conn->node) {
 			if (dragged_conn->type == Conn_Type::input) {
@@ -201,7 +202,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
-				nodes->AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), new ModulePy("Run", "script")));
+				nodes->AddNode(new Node("New ADD", scene_pos, ImVec2(0.5f, 0.5f), new ModulePy("add")));
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}

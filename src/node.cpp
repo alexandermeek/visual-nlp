@@ -102,7 +102,7 @@ bool Node::Hovered(ImVec2 offset) {
 }
 
 void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
-	ImU32 node_bg_color = hovered ? IM_COL32(75, 75, 75, 255) : IM_COL32(60, 60, 60, 255);
+	ImU32 node_bg_color = hovered ? HOVER_BG_COL : BG_COL;
 	ImVec2 node_rect_min = offset + pos;
 	ImVec2 node_rect_max = node_rect_min + size;
 
