@@ -1,5 +1,8 @@
 #include "module.h"
 
+Module::Module(const std::string function_name)
+	: Module(function_name, function_name) {}
+
 Module::Module(const std::string function_name, const std::string script_file)
 	: function_name(function_name), script_file(script_file), results(nullptr) {}
 
@@ -15,12 +18,12 @@ std::string Module::ScriptFile() {
 	return script_file;
 }
 
-int Module::NumParams() {
+int Module::ParamsCount() {
 	return (int)param_types.size();
 }
 
-int Module::NumReturns() {
-	return (int)results->size();
+int Module::ReturnsCount() {
+	return (int)return_types.size();
 }
 
 const std::vector<std::string>* Module::ParamNames() {

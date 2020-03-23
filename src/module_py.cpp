@@ -1,6 +1,8 @@
 #include "module_py.h"
 
-ModulePy::ModulePy(const std::string name, const std::string script_file) : Module(name, script_file) {
+ModulePy::ModulePy(const std::string function_name) : ModulePy(function_name, function_name) {}
+
+ModulePy::ModulePy(const std::string function_name, const std::string script_file) : Module(function_name, script_file) {
 	ReadScriptHeader();
 }
 
@@ -57,7 +59,10 @@ std::vector<std::string> ModulePy::ParseLine(std::string line) {
 		tokens.push_back(line.substr(0, pos));
 		line.erase(0, pos + delimiter.length());
 	}
-	tokens.push_back(line);
+	
+	if (line.length() != 0) {
+		tokens.push_back(line);
+	}
 	return tokens;
 }
 
@@ -85,6 +90,17 @@ json::value_t ModulePy::ParseType(std::string type) {
 	}
 }
 
+void ModulePy::Run() {
+	if (ParamsCount() != 0) {
+		throw std::runtime_error("Cannot run this module without parameters.");
+	}
+	else {
+		json* empty_json = new json();
+		Run(empty_json);
+		delete empty_json;
+	}
+}
+
 void ModulePy::Run(json* parameters) {
 	py::scoped_interpreter guard{};
 
@@ -95,17 +111,17 @@ void ModulePy::Run(json* parameters) {
 	py::function f = py::module::import(script_path.str().c_str()).attr(function_name.c_str()); // import function with in script file and module name
 
 	py::object py_args;
-	if (!parameters->empty()) {
+	if (!parameters->empty() && parameters != nullptr) {
 		py_args = py_json.attr("loads")(py::str(parameters->dump())); // parse json parameters from c to python
 	}
 
 	try {
 		py::object obj;
-		if (NumParams() > 0) {
+		if (ParamsCount() > 0) {
 			obj = f(*py_args); // call function with unpacked args
 		}
 		else {
-			obj = f();
+			obj = f(); // call function without parameters
 		}
 
 		std::string str_json = py_json.attr("dumps")(obj).cast<std::string>(); // parse json returns from python to c
@@ -113,10 +129,11 @@ void ModulePy::Run(json* parameters) {
 		results = new json(json::parse(str_json));
 	}
 	catch (std::runtime_error) {
-		results = new json();
+		results = nullptr;
 	}
 
+	/*std::cout << (int)ResultTypes()[0] << std::endl;
 	if (ResultTypes() != return_types) {
 		throw std::runtime_error("Resulting types do not match declared return types.");
-	}
+	}*/
 }

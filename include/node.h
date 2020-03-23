@@ -7,6 +7,7 @@
 #include "module.h"
 
 #include <imgui/imgui.h>
+#include <nlohmann/json.hpp>
 
 #include <vector>
 #include <string>
@@ -22,15 +23,16 @@ private:
 public:
 	int					id;
 	std::string			name;
-	int					inputs_count, outputs_count;
 	ImVector<NodeConn*> input_conns;
 	ImVector<NodeConn*> output_conns;
 
-	Module*				module;
+	Module* module;
 
-	Node(const std::string name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
+	Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module);
 	virtual ~Node();
 
+	int InputsCount();
+	int OutputsCount();
 	ImVec2 GetSlotPos(int slot_num, Conn_Type type);
 	ImVec2 Pos();
 	ImVec2 Size();
@@ -43,6 +45,7 @@ public:
 	void Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered);
 	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn);
 
+	json* Results();
 	void Run();
 };
 #endif //NODE_H

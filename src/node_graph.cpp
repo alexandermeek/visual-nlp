@@ -41,32 +41,12 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static int node_selected = -1;
 
 	if (!initialised) {
-		nodes->AddNode(new Node("Node One", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), 1, 1));
-		nodes->AddNode(new Node("Node Two", ImVec2(40.0f, 150.0f), ImVec2(0.5f, 0.5f), 1, 1));
-		NodeLink* link = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[1]->GetConn(0, Conn_Type::input));
+		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
+		nodes->AddNode(new Node("Node Y", ImVec2(40.0f, 250.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
+		nodes->AddNode(new Node("Node ADD", ImVec2(250.0f, 150.0f), ImVec2(0.5f, 0.5f), new ModulePy("add")));
+		NodeLink* link_1 = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[2]->GetConn(0, Conn_Type::input));
+		NodeLink* link_2 = new NodeLink((*nodes)[1]->GetConn(0, Conn_Type::output), (*nodes)[2]->GetConn(1, Conn_Type::input));
 		initialised = true;
-
-		ModulePy m("Run", "script");
-#include <nlohmann/json.hpp>
-		nlohmann::json j = "[2, true, 3.5]"_json;
-		m.Run(&j);
-		std::cout << m.Results()->dump(4) << std::endl;
-		const std::vector<std::string>* names = m.ParamNames();
-		for (std::string n : *names) {
-			std::cout << n << " ";
-		}
-		std::cout << std::endl;
-		const std::vector<json::value_t>* r_types = m.ReturnTypes();
-		for (json::value_t t : *r_types) {
-			std::cout << (int)t << " ";
-		}
-		std::cout << std::endl;
-		const std::vector<json::value_t> res_types = m.ResultTypes();
-		for (json::value_t r_t : res_types) {
-			std::cout << (int)r_t << " ";
-		}
-		std::cout << std::endl;
-		std::cout << (*m.ReturnTypes() == m.ResultTypes()) << std::endl;
 	}
 
 	bool open_context_menu = false;
@@ -142,11 +122,13 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
 	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
-		if (dragged_conn->type == Conn_Type::input) {
-			NodeLink* link = new NodeLink(hovered_conn, dragged_conn);
-		}
-		else {
-			NodeLink* link = new NodeLink(dragged_conn, hovered_conn);
+		if (dragged_conn->node != hovered_conn->node) {
+			if (dragged_conn->type == Conn_Type::input) {
+				NodeLink* link = new NodeLink(hovered_conn, dragged_conn);
+			}
+			else {
+				NodeLink* link = new NodeLink(dragged_conn, hovered_conn);
+			}
 		}
 		conn_drag = false;
 	}
@@ -205,6 +187,9 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		if (node) {
 			ImGui::Text("Node '%s'", node->name.c_str());
 			ImGui::Separator();
+			if (ImGui::MenuItem("Run >")) {
+				node->Run();
+			}
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
 				nodes->RemoveNode(node_selected);
@@ -216,7 +201,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
-				nodes->AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), 2, 2));
+				nodes->AddNode(new Node("New node", scene_pos, ImVec2(0.5f, 0.5f), new ModulePy("Run", "script")));
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}

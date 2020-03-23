@@ -26,15 +26,16 @@ protected:
 	std::vector<json::value_t> param_types;
 	std::vector<json::value_t> return_types;
 
-	json* results;
+	
 public:
-	Module(const std::string name, const std::string script_file);
+	Module(const std::string function_name);
+	Module(const std::string function_name, const std::string script_file);
 	virtual ~Module();
 
 	virtual std::string FunctionName();
 	virtual std::string ScriptFile();
-	virtual int NumParams();
-	virtual int NumReturns();
+	virtual int ParamsCount();
+	virtual int ReturnsCount();
 	virtual const std::vector<std::string>* ParamNames();
 	virtual const std::vector<json::value_t>* ParamTypes();
 	virtual const std::vector<json::value_t>* ReturnTypes();
@@ -42,7 +43,8 @@ public:
 	virtual json* Results();
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
-
+	json* results;
+	virtual void Run() = 0;
 	virtual void Run(json* parameters) = 0;
 };
 #endif // MODULE_H
