@@ -24,6 +24,10 @@ target_link_libraries(VisualNLP PRIVATE nlohmann_json::nlohmann_json)
 target_include_directories(VisualNLP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include 
 ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
+file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/scripts)
+
+message(STATUS "Removed old scripts in binary directory")
+
 # Copy contents of scripts folder to binary directory.
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
