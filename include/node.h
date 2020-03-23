@@ -23,8 +23,8 @@ private:
 public:
 	int					id;
 	std::string			name;
-	ImVector<NodeConn*> input_conns;
-	ImVector<NodeConn*> output_conns;
+	std::vector<NodeConn*> input_conns;
+	std::vector<NodeConn*> output_conns;
 
 	Module* module;
 

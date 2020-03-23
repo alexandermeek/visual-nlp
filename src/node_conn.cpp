@@ -25,7 +25,7 @@ void NodeConn::AddLink(NodeLink* link) {
 }
 
 void NodeConn::RemoveLink(NodeLink* link) {
-	links.find_erase(link);
+	links.erase(std::find(links.begin(), links.end(), link));
 }
 
 void NodeConn::RemoveLinks() {
@@ -35,7 +35,7 @@ void NodeConn::RemoveLinks() {
 	links.clear();
 }
 
-ImVector<NodeLink*>* NodeConn::GetLinks() {
+std::vector<NodeLink*>* NodeConn::GetLinks() {
 	return &links;
 }
 

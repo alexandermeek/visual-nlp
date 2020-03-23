@@ -177,7 +177,15 @@ void Node::Run() {
 
 		const std::vector<std::string>* param_names = module->ParamNames();
 		for (int i = 0; i < inputs_count; i++) {
-			Node* prev_node = input_conns[i]->GetLinks()->operator[](0)->start->node;
+			Node* prev_node;
+			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
+			if (!links->empty()) {
+				prev_node = links->at(0)->start->node;
+			}
+			else {
+				throw std::runtime_error("Missing input link to node.");
+			}
+			
 
 			// Run previous node if hasn't run already
 			if (prev_node->Results() == nullptr) {

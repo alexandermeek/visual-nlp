@@ -44,8 +44,8 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
 		nodes->AddNode(new Node("Node Y", ImVec2(40.0f, 250.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
 		nodes->AddNode(new Node("Node ADD", ImVec2(250.0f, 150.0f), ImVec2(0.5f, 0.5f), new ModulePy("add")));
-		NodeLink* link_1 = new NodeLink((*nodes)[0]->GetConn(0, Conn_Type::output), (*nodes)[2]->GetConn(0, Conn_Type::input));
-		NodeLink* link_2 = new NodeLink((*nodes)[1]->GetConn(0, Conn_Type::output), (*nodes)[2]->GetConn(1, Conn_Type::input));
+		NodeLink* link_1 = new NodeLink(nodes->at(0)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(0, Conn_Type::input));
+		NodeLink* link_2 = new NodeLink(nodes->at(1)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(1, Conn_Type::input));
 		initialised = true;
 	}
 
@@ -61,7 +61,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::BeginChild("node_list", ImVec2(100, 0));
 	ImGui::Text("Nodes");
 	ImGui::Separator();
-	for (Node* node : (*nodes)) {
+	for (Node* node : *nodes) {
 		ImGui::PushID(node->id);
 		if (ImGui::Selectable(node->name.c_str(), node->id == node_selected)) {
 			node_selected = node->id;

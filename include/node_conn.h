@@ -4,6 +4,8 @@
 
 #include <imgui/imgui.h>
 
+#include <vector>
+
 class NodeLink;
 class Node;
 
@@ -14,7 +16,7 @@ enum class Conn_Type { input, output };
 
 class NodeConn {
 private:
-	ImVector<NodeLink*> links;
+	std::vector<NodeLink*> links;
 	const float RADIUS = 4.0f;
 	const ImU32 COLOUR = IM_COL32(150, 150, 150, 150);
 	const ImU32 HOVER_COLOUR = IM_COL32(175, 175, 175, 175);
@@ -31,7 +33,7 @@ public:
 	void AddLink(NodeLink*);
 	void RemoveLink(NodeLink*);
 	void RemoveLinks();
-	ImVector<NodeLink*>* GetLinks();
+	std::vector<NodeLink*>* GetLinks();
 
 	bool Hovered(ImVec2 offset);
 	void Draw(ImDrawList* draw_list, ImVec2 offset);
