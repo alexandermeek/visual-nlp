@@ -170,29 +170,30 @@ json* Node::Results() {
 void Node::Run() {
 	int inputs_count = InputsCount();
 	if (inputs_count == 0) {
-		module->Run();
+		module->Run(); // Run module with no parameters.
 	}
 	else {
 		json* params = new json(json::array());
 
-		const std::vector<std::string>* param_names = module->ParamNames();
 		for (int i = 0; i < inputs_count; i++) {
 			Node* prev_node;
 			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
-			if (!links->empty()) {
-				prev_node = links->at(0)->start->node;
+
+			if (links->size() <= 0) {
+				throw MissingInputException("No input links detected.", module);
 			}
 			else {
-				throw std::runtime_error("Missing input link to node.");
-			}
-			
 
-			// Run previous node if hasn't run already
-			if (prev_node->Results() == nullptr) {
-				prev_node->Run();
-			}
+				prev_node = links->at(0)->start->node;
 
-			params->insert(params->begin() + i, *prev_node->Results());
+				// Run previous node if hasn't run already
+				if (prev_node->Results() == nullptr) {
+					prev_node->Run();
+				}
+
+				// Insert parameters into list
+				auto it = params->insert(params->begin() + i, *prev_node->Results());
+			}
 		}
 		module->Run(params);
 	}

@@ -32,15 +32,15 @@ public:
 	Module(const std::string function_name, const std::string script_file);
 	virtual ~Module();
 
-	virtual std::string FunctionName();
-	virtual std::string ScriptFile();
-	virtual int ParamsCount();
-	virtual int ReturnsCount();
-	virtual const std::vector<std::string>* ParamNames();
-	virtual const std::vector<json::value_t>* ParamTypes();
-	virtual const std::vector<json::value_t>* ReturnTypes();
+	std::string FunctionName() const;
+	std::string ScriptFile() const;
+	int ParamsCount() const;
+	int ReturnsCount() const;
+	const std::vector<std::string>* ParamNames() const;
+	const std::vector<json::value_t>* ParamTypes() const;
+	const std::vector<json::value_t>* ReturnTypes() const;
 
-	virtual json* Results();
+	virtual json* Results() const;
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
 	json* results;

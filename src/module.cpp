@@ -10,35 +10,35 @@ Module::~Module() {
 	delete results;
 }
 
-std::string Module::FunctionName() {
+std::string Module::FunctionName() const {
 	return function_name;
 }
 
-std::string Module::ScriptFile() {
+std::string Module::ScriptFile() const {
 	return script_file;
 }
 
-int Module::ParamsCount() {
+int Module::ParamsCount() const {
 	return (int)param_types.size();
 }
 
-int Module::ReturnsCount() {
+int Module::ReturnsCount() const {
 	return (int)return_types.size();
 }
 
-const std::vector<std::string>* Module::ParamNames() {
+const std::vector<std::string>* Module::ParamNames() const {
 	return &param_names;
 }
 
-const std::vector<json::value_t>* Module::ParamTypes() {
+const std::vector<json::value_t>* Module::ParamTypes() const {
 	return &param_types;
 }
 
-const std::vector<json::value_t>* Module::ReturnTypes() {
+const std::vector<json::value_t>* Module::ReturnTypes() const {
 	return &return_types;
 }
 
-json* Module::Results() {
+json* Module::Results() const {
 	return results;
 }
 

@@ -30,6 +30,7 @@ public:
 
 	ImVec2 Pos();
 
+	bool HasLink() const;
 	void AddLink(NodeLink*);
 	void RemoveLink(NodeLink*);
 	void RemoveLinks();

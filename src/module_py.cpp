@@ -1,4 +1,5 @@
 #include "module_py.h"
+#include "exceptions.h"
 
 ModulePy::ModulePy(const std::string function_name) : ModulePy(function_name, function_name) {}
 
@@ -92,7 +93,7 @@ json::value_t ModulePy::ParseType(std::string type) {
 
 void ModulePy::Run() {
 	if (ParamsCount() != 0) {
-		throw std::runtime_error("Cannot run this module without parameters.");
+		throw MissingInputException("Expected at least one parameter, received none", this); // Module missing parameters.
 	}
 	else {
 		json* empty_json = new json();

@@ -14,6 +14,10 @@ ImVec2 NodeConn::Pos() {
 	return node->GetSlotPos(slot_num, type);
 }
 
+bool NodeConn::HasLink() const {
+	return links.size() > 0;
+}
+
 void NodeConn::AddLink(NodeLink* link) {
 	if (type == Conn_Type::input) {
 		RemoveLinks();

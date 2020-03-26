@@ -5,6 +5,7 @@
 #include "node_conn.h"
 #include "node_link.h"
 #include "module.h"
+#include "exceptions.h"
 
 #include <imgui/imgui.h>
 #include <nlohmann/json.hpp>

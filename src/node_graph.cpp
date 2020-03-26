@@ -5,6 +5,7 @@
 #include "module_py.h"
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 #include <math.h> // fmodf
 #include <iostream>
@@ -26,6 +27,33 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	ImGui::End();
 }
 
+void ErrorPopups(std::exception* ex) { // TODO: add exception details to error popup.
+	// Popup Messages
+	if (ImGui::BeginPopupModal("Missing Input", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{	
+		std::stringstream msg;
+		msg << "A module is missing input data." << std::endl;
+		if (dynamic_cast<MissingInputException*>(ex)) {
+			MissingInputException* mi_ex = (MissingInputException*)ex;
+			msg.clear();
+			msg << "The module: " << mi_ex->module->FunctionName() << " is missing input data." << std::endl
+				<< mi_ex->msg << std::endl;
+		}
+		
+		ImGui::Text(msg.str().c_str());
+		ImGui::Separator();
+
+		if (ImGui::Button("OK", ImVec2(120, 0))) { 
+			ImGui::CloseCurrentPopup();
+			delete ex;
+		}
+		ImGui::SetItemDefaultFocus();
+		/*ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }*/
+		ImGui::EndPopup();
+	}
+}
+
 void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
@@ -34,6 +62,8 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 	static std::vector<std::string> stats;
 	if (*debug) ShowDiagnosticsWindow(debug, &stats);
+
+	static std::exception* ex; // Exception caught, needed for error message output.
 
 	static bool initialised = false;
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
@@ -188,9 +218,20 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		if (node) {
 			ImGui::Text("Node '%s'", node->name.c_str());
 			ImGui::Separator();
-			if (ImGui::MenuItem("Run >")) {
-				node->Run();
+
+			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true); // Allow another popup to open without closing the context menu
+			if (ImGui::MenuItem("Run")) {
+				try {
+					node->Run();
+					ImGui::CloseCurrentPopup();
+				}
+				catch (MissingInputException& e) {
+					ex = new MissingInputException(e);
+					ImGui::OpenPopup("Missing Input");
+				}
 			}
+			ImGui::PopItemFlag();
+
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
 				nodes->RemoveNode(node_selected);
@@ -206,9 +247,12 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}
+		ErrorPopups(ex);
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();
+
+	
 
 	// Scrolling
 	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(2, 0.0f))
