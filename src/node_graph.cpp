@@ -35,7 +35,7 @@ void ErrorPopups(std::exception* ex) { // TODO: add exception details to error p
 		msg << "A module is missing input data." << std::endl;
 		if (dynamic_cast<MissingInputException*>(ex)) {
 			MissingInputException* mi_ex = (MissingInputException*)ex;
-			msg.clear();
+			msg.str("");
 			msg << "The module: " << mi_ex->module->FunctionName() << " is missing input data." << std::endl
 				<< mi_ex->msg << std::endl;
 		}
@@ -169,10 +169,10 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 	// Display nodes
 	conn_hover = false;
-	for (Node* node : (*nodes)) {
+	for (Node* node : *nodes) {
 		ImGui::PushID(node->id);
 
-		bool node_widgets_active = ImGui::IsAnyItemActive();
+		bool old_node_active = ImGui::IsAnyItemActive(); // Check if a node was selected before
 
 		if (node->Hovered(offset)) {
 			node_hovered_in_scene = node->id;
@@ -182,12 +182,15 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		bool node_hovered = (node_hovered_in_list == node->id || node_hovered_in_scene == node->id || (node_hovered_in_list == -1 && node_selected == node->id));
 		node->Draw(draw_list, offset, node_hovered);
 
+		bool node_widgets_active = !old_node_active && ImGui::IsAnyItemActive();
+
 		bool node_moving_active = ImGui::IsItemActive();
 		if (node_widgets_active || node_moving_active)
 			node_selected = node->id;
-		if (node_moving_active && ImGui::IsMouseDragging(0) && !conn_hover && !conn_drag)
+		if (node_moving_active && ImGui::IsMouseDragging(0) && !conn_hover && !conn_drag) {
 			node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
-
+		}
+		
 		node->CheckConns(offset, conn_hover, hovered_conn, conn_drag, dragged_conn);
 
 		ImGui::PopID();
@@ -280,6 +283,10 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		Node* node = nodes->GetNode(node_selected);
 		std::stringstream ss;
 		ss << "NodeSize(" << node->Size().x << "," << node->Size().y << ")";
+		stats.push_back(ss.str());
+		
+		ss.str("");
+		ss << "NodeID: " << node->id << " NodeName: " << node->name;
 		stats.push_back(ss.str());
 	}
 
