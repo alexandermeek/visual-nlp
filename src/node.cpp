@@ -135,10 +135,10 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	}
 }
 
-void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn) {
+void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn, bool& node_drag) {
 	for (NodeConn* conn : input_conns) {
 		bool tmp_conn_hover = conn->Hovered(offset);
-		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
+		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag && !node_drag) {
 			dragged_conn = conn;
 			conn_drag = true;
 			break;
@@ -151,7 +151,7 @@ void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, 
 
 	for (NodeConn* conn : output_conns) {
 		bool tmp_conn_hover = conn->Hovered(offset);
-		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
+		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag && !node_drag) {
 			dragged_conn = conn;
 			conn_drag = true;
 			break;

@@ -83,6 +83,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	int node_hovered_in_list = -1;
 	int node_hovered_in_scene = -1;
 
+	static bool node_drag = false;
 	static bool conn_hover = false;
 	static bool conn_drag = false;
 	static NodeConn* hovered_conn = nullptr;
@@ -169,6 +170,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 	// Display nodes
 	conn_hover = false;
+	if (!ImGui::IsMouseDragging(0) || conn_drag) { node_drag = false; }
 	for (Node* node : *nodes) {
 		ImGui::PushID(node->id);
 
@@ -187,11 +189,14 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		bool node_moving_active = ImGui::IsItemActive();
 		if (node_widgets_active || node_moving_active)
 			node_selected = node->id;
-		if (node_moving_active && ImGui::IsMouseDragging(0) && !conn_hover && !conn_drag) {
-			node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
+		if (node_moving_active && ImGui::IsMouseDragging(0)){
+			node_drag = true;
+			if (!conn_hover && !conn_drag) {
+				node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
+			}
 		}
 		
-		node->CheckConns(offset, conn_hover, hovered_conn, conn_drag, dragged_conn);
+		node->CheckConns(offset, conn_hover, hovered_conn, conn_drag, dragged_conn, node_drag);
 
 		ImGui::PopID();
 	}

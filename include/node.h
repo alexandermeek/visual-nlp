@@ -46,7 +46,7 @@ public:
 	NodeConn* GetConn(int slot_num, Conn_Type type);
 
 	void Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered);
-	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn);
+	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn, bool& node_drag);
 
 	json* Results();
 	void Run();
