@@ -43,6 +43,26 @@ std::vector<NodeLink*>* NodeConn::GetLinks() {
 	return &links;
 }
 
+std::string NodeConn::Label() {
+	if (type == Conn_Type::input) {
+		return (*node->module->ParamNames())[slot_num];
+	}
+	else {
+		return "";
+	}
+}
+
+std::string NodeConn::DataType() {
+	json::value_t data_type;
+	if (type == Conn_Type::input) {
+		data_type = (*node->module->ParamTypes())[slot_num];
+	}
+	else if (type == Conn_Type::output) {
+		data_type = (*node->module->ReturnTypes())[slot_num];
+	}
+	return node->module->TypeToString(data_type);
+}
+
 bool NodeConn::Hovered(ImVec2 offset) {
 	ImVec2 mouse_pos = ImGui::GetIO().MousePos;
 	ImVec2 conn_pos = node->GetSlotPos(slot_num, type);

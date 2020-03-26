@@ -2,6 +2,8 @@
 #define NODECONN_H
 #pragma once
 
+#include "module.h"
+
 #include <imgui/imgui.h>
 
 #include <vector>
@@ -35,6 +37,9 @@ public:
 	void RemoveLink(NodeLink*);
 	void RemoveLinks();
 	std::vector<NodeLink*>* GetLinks();
+
+	std::string Label();
+	std::string DataType();
 
 	bool Hovered(ImVec2 offset);
 	void Draw(ImDrawList* draw_list, ImVec2 offset);

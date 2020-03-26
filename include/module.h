@@ -40,6 +40,8 @@ public:
 	const std::vector<json::value_t>* ParamTypes() const;
 	const std::vector<json::value_t>* ReturnTypes() const;
 
+	std::string TypeToString(json::value_t data_type) const;
+
 	virtual json* Results() const;
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();

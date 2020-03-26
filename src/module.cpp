@@ -38,6 +38,31 @@ const std::vector<json::value_t>* Module::ReturnTypes() const {
 	return &return_types;
 }
 
+std::string Module::TypeToString(json::value_t data_type) const {
+	switch (data_type) {
+	case json::value_t::null:
+		return "null";
+	case json::value_t::object:
+		return "object";
+	case json::value_t::array:
+		return "array";
+	case json::value_t::string:
+		return "string";
+	case json::value_t::boolean:
+		return "boolean";
+	case json::value_t::number_integer:
+		return "integer";
+	case json::value_t::number_unsigned:
+		return "unsigned integer";
+	case json::value_t::number_float:
+		return "float";
+	case json::value_t::discarded:
+		return "discarded";
+	default:
+		return "";
+	}
+}
+
 json* Module::Results() const {
 	return results;
 }

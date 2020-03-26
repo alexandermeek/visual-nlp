@@ -210,6 +210,13 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		}
 	}
 	if (conn_hover && ImGui::IsMouseClicked(1)) hovered_conn->RemoveLinks();
+	if (conn_hover) {
+		std::stringstream ss;
+		ss << hovered_conn->Label() << ": " << hovered_conn->DataType();
+		ImGui::BeginTooltip();
+		ImGui::Text("%s", ss.str().c_str());
+		ImGui::EndTooltip();
+	}
 	if (open_context_menu && !conn_hover) {
 		ImGui::OpenPopup("context_menu");
 		if (node_hovered_in_list != -1)
