@@ -167,7 +167,7 @@ json* Node::Results() {
 	return module->Results();
 }
 
-void Node::Run() {
+void Node::Run(bool force_rerun) {
 	int inputs_count = InputsCount();
 	if (inputs_count == 0) {
 		module->Run(); // Run module with no parameters.
@@ -187,8 +187,8 @@ void Node::Run() {
 				prev_node = links->at(0)->start->node;
 
 				// Run previous node if hasn't run already
-				if (prev_node->Results() == nullptr) {
-					prev_node->Run();
+				if (prev_node->Results() == nullptr || force_rerun) {
+					prev_node->Run(force_rerun);
 				}
 
 				// Insert parameters into list

@@ -235,15 +235,28 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			ImGui::Separator();
 
 			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true); // Allow another popup to open without closing the context menu
-			if (ImGui::MenuItem("Run")) {
-				try {
-					node->Run();
-					ImGui::CloseCurrentPopup();
+			if (ImGui::BeginMenu("Run")) {
+				if (ImGui::MenuItem("Run this (+ missing inputs)")) {
+					try {
+						node->Run(false);
+						ImGui::CloseCurrentPopup();
+					}
+					catch (MissingInputException& e) {
+						ex = new MissingInputException(e);
+						ImGui::OpenPopup("Missing Input");
+					}
 				}
-				catch (MissingInputException& e) {
-					ex = new MissingInputException(e);
-					ImGui::OpenPopup("Missing Input");
+				if (ImGui::MenuItem("Run all (force reruns)")) {
+					try {
+						node->Run(true);
+						ImGui::CloseCurrentPopup();
+					}
+					catch (MissingInputException& e) {
+						ex = new MissingInputException(e);
+						ImGui::OpenPopup("Missing Input");
+					}
 				}
+				ImGui::EndMenu();
 			}
 			ImGui::PopItemFlag();
 

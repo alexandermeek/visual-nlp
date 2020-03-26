@@ -49,6 +49,6 @@ public:
 	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn, bool& node_drag);
 
 	json* Results();
-	void Run();
+	void Run(bool force_rerun);
 };
 #endif //NODE_H
