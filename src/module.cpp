@@ -38,6 +38,14 @@ const std::vector<json::value_t>* Module::ReturnTypes() const {
 	return &return_types;
 }
 
+std::vector<std::string> Module::ParamTypesToString() const {
+	return TypesToString(param_types);
+}
+
+std::vector<std::string> Module::ReturnTypesToString() const {
+	return TypesToString(return_types);
+}
+
 std::string Module::TypeToString(json::value_t data_type) const {
 	switch (data_type) {
 	case json::value_t::null:
@@ -61,6 +69,14 @@ std::string Module::TypeToString(json::value_t data_type) const {
 	default:
 		return "";
 	}
+}
+
+std::vector<std::string> Module::TypesToString(std::vector<json::value_t> types) const {
+	std::vector<std::string> types_str;
+	for (json::value_t t : types) {
+		types_str.push_back(TypeToString(t));
+	}
+	return types_str;
 }
 
 json* Module::Results() const {

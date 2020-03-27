@@ -3,6 +3,7 @@
 #include "node_vec.h"
 #include "module.h"
 #include "module_py.h"
+#include "node_graph_utils.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -12,47 +13,6 @@
 #include <memory>
 #include <string>
 #include <sstream>
-
-void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
-	if (!ImGui::Begin("Node Graph Diagnostics", p_open)) {
-		ImGui::End();
-		return;
-	}
-	//ImGui::SetNextWindowSize(ImVec2(70, 50), ImGuiCond_FirstUseEver);
-	ImGui::Text("Node Graph Diagnostics Tool");
-	for (int i = 0; i < stats->size(); i++) {
-		ImGui::Text(stats->at(i).c_str());
-	}
-
-	ImGui::End();
-}
-
-void ErrorPopups(std::exception* ex) { // TODO: add exception details to error popup.
-	// Popup Messages
-	if (ImGui::BeginPopupModal("Missing Input", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-	{	
-		std::stringstream msg;
-		msg << "A module is missing input data." << std::endl;
-		if (dynamic_cast<MissingInputException*>(ex)) {
-			MissingInputException* mi_ex = (MissingInputException*)ex;
-			msg.str("");
-			msg << "The module: " << mi_ex->module->FunctionName() << " is missing input data." << std::endl
-				<< mi_ex->msg << std::endl;
-		}
-		
-		ImGui::Text(msg.str().c_str());
-		ImGui::Separator();
-
-		if (ImGui::Button("OK", ImVec2(120, 0))) { 
-			ImGui::CloseCurrentPopup();
-			delete ex;
-		}
-		ImGui::SetItemDefaultFocus();
-		/*ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }*/
-		ImGui::EndPopup();
-	}
-}
 
 void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
@@ -69,6 +29,9 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
 	static bool show_grid = true;
 	static int node_selected = -1;
+
+	static bool show_node_editor = false;
+	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected));
 
 	if (!initialised) {
 		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
@@ -100,6 +63,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		if (ImGui::IsItemHovered()) {
 			node_hovered_in_list = node->id;
 			open_context_menu |= ImGui::IsMouseClicked(1);
+			if (ImGui::IsMouseDoubleClicked(0)) show_node_editor = true;
 		}
 		ImGui::PopID();
 	}
@@ -179,6 +143,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		if (node->Hovered(offset)) {
 			node_hovered_in_scene = node->id;
 			if (ImGui::IsMouseClicked(1)) open_context_menu = true;
+			if (ImGui::IsMouseDoubleClicked(0)) show_node_editor = true;
 		}
 
 		bool node_hovered = (node_hovered_in_list == node->id || node_hovered_in_scene == node->id || (node_hovered_in_list == -1 && node_selected == node->id));
@@ -202,14 +167,17 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	}
 	draw_list->ChannelsMerge();
 
-	// Open context menu
+	// Open context menu in empty canvas
 	if (!ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered() && (ImGui::IsMouseClicked(1) || ImGui::IsMouseClicked(0))) {
 		node_selected = node_hovered_in_list = node_hovered_in_scene = -1;
 		if (ImGui::IsMouseClicked(1)) {
-				open_context_menu = true;
+			open_context_menu = true;
 		}
 	}
+	// Remove links on conn right click
 	if (conn_hover && ImGui::IsMouseClicked(1)) hovered_conn->RemoveLinks();
+	
+	// Tooltips for node connectors
 	if (conn_hover) {
 		std::stringstream ss;
 		ss << hovered_conn->Label() << ": " << hovered_conn->DataType();
@@ -217,6 +185,8 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		ImGui::Text("%s", ss.str().c_str());
 		ImGui::EndTooltip();
 	}
+
+	// Open context menu
 	if (open_context_menu && !conn_hover) {
 		ImGui::OpenPopup("context_menu");
 		if (node_hovered_in_list != -1)
@@ -236,7 +206,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true); // Allow another popup to open without closing the context menu
 			if (ImGui::BeginMenu("Run")) {
-				if (ImGui::MenuItem("Run this (+ missing inputs)")) {
+				if (ImGui::MenuItem("Run this (no reruns)")) {
 					try {
 						node->Run(false);
 						ImGui::CloseCurrentPopup();

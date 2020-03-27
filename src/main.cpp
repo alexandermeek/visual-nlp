@@ -186,12 +186,12 @@ void ShowAppMainMenuBar(bool* show_node_graph, bool* show_node_graph_debug, bool
 			{
 				*show_demo_window = true;
 			}
-			if (ImGui::MenuItem("Graph test")) {
+			/*if (ImGui::MenuItem("Graph test")) {
 				*show_graph_window = true;
 			}
 			if (ImGui::MenuItem("Node test")) {
 				*show_nodes_window = true;
-			}
+			}*/
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Tools"))

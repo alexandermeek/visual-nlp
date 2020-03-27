@@ -26,7 +26,7 @@ protected:
 	std::vector<json::value_t> param_types;
 	std::vector<json::value_t> return_types;
 
-	
+	std::vector<std::string> TypesToString(std::vector<json::value_t> types) const;
 public:
 	Module(const std::string function_name);
 	Module(const std::string function_name, const std::string script_file);
@@ -39,6 +39,8 @@ public:
 	const std::vector<std::string>* ParamNames() const;
 	const std::vector<json::value_t>* ParamTypes() const;
 	const std::vector<json::value_t>* ReturnTypes() const;
+	std::vector<std::string> ParamTypesToString() const;
+	std::vector<std::string> ReturnTypesToString() const;
 
 	std::string TypeToString(json::value_t data_type) const;
 
