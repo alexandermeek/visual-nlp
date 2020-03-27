@@ -23,7 +23,10 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static std::vector<std::string> stats;
 	if (*debug) ShowDiagnosticsWindow(debug, &stats);
 
-	static std::exception* ex; // Exception caught, needed for error message output.
+	static bool show_error_popup = false;
+	static std::exception* ex; // Exception caught, saved for error message output.
+	if (show_error_popup) ImGui::OpenPopup("Missing Input");
+	ErrorPopups(&show_error_popup, &ex);
 
 	static bool initialised = false;
 	static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
@@ -31,7 +34,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static int node_selected = -1;
 
 	static bool show_node_editor = false;
-	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected));
+	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &ex);
 
 	if (!initialised) {
 		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
@@ -204,31 +207,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			ImGui::Text("Node '%s'", node->name.c_str());
 			ImGui::Separator();
 
-			ImGui::PushItemFlag(ImGuiItemFlags_SelectableDontClosePopup, true); // Allow another popup to open without closing the context menu
-			if (ImGui::BeginMenu("Run")) {
-				if (ImGui::MenuItem("Run this (no reruns)")) {
-					try {
-						node->Run(false);
-						ImGui::CloseCurrentPopup();
-					}
-					catch (MissingInputException& e) {
-						ex = new MissingInputException(e);
-						ImGui::OpenPopup("Missing Input");
-					}
-				}
-				if (ImGui::MenuItem("Run all (force reruns)")) {
-					try {
-						node->Run(true);
-						ImGui::CloseCurrentPopup();
-					}
-					catch (MissingInputException& e) {
-						ex = new MissingInputException(e);
-						ImGui::OpenPopup("Missing Input");
-					}
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::PopItemFlag();
+			RunMenu(node, &show_error_popup, &ex);
 
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
@@ -245,7 +224,6 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			}
 			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}
-		ErrorPopups(ex);
 		ImGui::EndPopup();
 	}
 	ImGui::PopStyleVar();

@@ -53,7 +53,7 @@ std::string NodeConn::Label() {
 }
 
 std::string NodeConn::DataType() {
-	json::value_t data_type;
+	json::value_t data_type = json::value_t::null;
 	if (type == Conn_Type::input) {
 		data_type = (*node->module->ParamTypes())[slot_num];
 	}

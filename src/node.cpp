@@ -7,7 +7,7 @@ Node::Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module)
 	: name(name), pos(pos), size(size), module(module) {
 	this->id = next_id++;
 
-	if (module != nullptr) {
+	if (module) {
 		for (int i = 0; i < module->ParamsCount(); i++) {
 			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
 			input_conns.push_back(new_conn);
@@ -113,7 +113,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::Text("%s", name.c_str());
 	ImGui::Text("Node description...");
 	json* results = Results();
-	if (results != nullptr && !results->empty()) {
+	if (results && !results->empty()) {
 		ImGui::Text("Result(s): %s", results->dump().c_str());
 	}
 	ImGui::EndGroup();
