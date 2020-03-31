@@ -3,17 +3,19 @@
 #include <iostream>
 int Node::next_id = 0;
 
-Node::Node(const std::string name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count)
-	: name(name), pos(pos), size(size), inputs_count(inputs_count), outputs_count(outputs_count), module(nullptr) {
+Node::Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module)
+	: name(name), pos(pos), size(size), module(module) {
 	this->id = next_id++;
 
-	for (int i = 0; i < inputs_count; i++) {
-		NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
-		input_conns.push_back(new_conn);
-	}
-	for (int i = 0; i < outputs_count; i++) {
-		NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
-		output_conns.push_back(new_conn);
+	if (module) {
+		for (int i = 0; i < module->ParamsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
+			input_conns.push_back(new_conn);
+		}
+		for (int i = 0; i < module->ReturnsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
+			output_conns.push_back(new_conn);
+		}
 	}
 }
 
@@ -26,14 +28,24 @@ Node::~Node() {
 		delete output_conns[i];
 	}
 	output_conns.clear();
+
+	delete module;
+}
+
+int Node::InputsCount() {
+	return module->ParamsCount();
+}
+
+int Node::OutputsCount() {
+	return module->ReturnsCount();
 }
 
 ImVec2 Node::GetSlotPos(int slot_num, Conn_Type type) {
 	if (type == Conn_Type::input) {
-		return ImVec2(pos.x, pos.y + size.y * ((float)slot_num + 1) / ((float)inputs_count + 1));
+		return ImVec2(pos.x, pos.y + size.y * ((float)slot_num + 1) / ((float)InputsCount() + 1));
 	}
 	else if (type == Conn_Type::output) {
-		return ImVec2(pos.x + size.x, pos.y + size.y * ((float)slot_num + 1) / ((float)outputs_count + 1));
+		return ImVec2(pos.x + size.x, pos.y + size.y * ((float)slot_num + 1) / ((float)OutputsCount() + 1));
 	}
 	else {
 		return ImVec2(0, 0);
@@ -58,13 +70,13 @@ void Node::Move(ImVec2 new_pos) {
 
 NodeConn* Node::GetConn(int slot_num, Conn_Type type) {
 	if (type == Conn_Type::input) {
-		if (slot_num >= inputs_count) {
+		if (slot_num >= InputsCount()) {
 			return nullptr;
 		}
 		return input_conns[slot_num];
 	} 
 	else if (type == Conn_Type::output) {
-		if (slot_num >= outputs_count) {
+		if (slot_num >= OutputsCount()) {
 			return nullptr;
 		}
 
@@ -90,7 +102,7 @@ bool Node::Hovered(ImVec2 offset) {
 }
 
 void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
-	ImU32 node_bg_color = hovered ? IM_COL32(75, 75, 75, 255) : IM_COL32(60, 60, 60, 255);
+	ImU32 node_bg_color = hovered ? HOVER_BG_COL : BG_COL;
 	ImVec2 node_rect_min = offset + pos;
 	ImVec2 node_rect_max = node_rect_min + size;
 
@@ -99,7 +111,11 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
 	ImGui::Text("%s", name.c_str());
-	ImGui::Text("Node description...");
+	//ImGui::Text("Node description...");
+	json* results = Results();
+	if (results && !results->empty()) {
+		ImGui::Text("Result(s): %s", results->dump().c_str());
+	}
 	ImGui::EndGroup();
 
 	Resize(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
@@ -119,10 +135,10 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	}
 }
 
-void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn) {
+void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn, bool& node_drag) {
 	for (NodeConn* conn : input_conns) {
 		bool tmp_conn_hover = conn->Hovered(offset);
-		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
+		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag && !node_drag) {
 			dragged_conn = conn;
 			conn_drag = true;
 			break;
@@ -135,7 +151,7 @@ void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, 
 
 	for (NodeConn* conn : output_conns) {
 		bool tmp_conn_hover = conn->Hovered(offset);
-		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag) {
+		if (tmp_conn_hover && ImGui::IsMouseDown(0) && !conn_drag && !node_drag) {
 			dragged_conn = conn;
 			conn_drag = true;
 			break;
@@ -147,6 +163,46 @@ void Node::CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, 
 	}
 }
 
-void Node::Run() {
-	//module->Run(args);
+json* Node::Results() {
+	return module->Results();
+}
+
+void Node::Run(bool force_rerun) {
+	int inputs_count = InputsCount();
+	if (inputs_count == 0) {
+		module->Run(); // Run module with no parameters.
+	}
+	else {
+		json* params = new json(json::array());
+
+		const std::vector<std::string>* param_names = module->ParamNames();
+		json* custom_params = module->CustomParams();
+
+		for (int i = 0; i < inputs_count; i++) {
+			Node* prev_node;
+			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
+
+			if (links->size() <= 0) {
+				throw MissingInputException("No input links detected.", module);
+			}
+			else {
+
+				prev_node = links->at(0)->start->node;
+
+				// Run previous node if hasn't run already
+				if (prev_node->Results() == nullptr || force_rerun) {
+					prev_node->Run(force_rerun);
+				}
+				
+				// Check if there exists a custom parameter, if so insert in place.
+				if (custom_params != nullptr && custom_params->find(param_names->at(i)) != custom_params->end()) {
+					params->push_back(custom_params->at(param_names->at(i)));
+				}
+				else {
+					params->push_back(*prev_node->Results());
+				}
+			}
+		}
+		module->Run(params);
+	}
 }

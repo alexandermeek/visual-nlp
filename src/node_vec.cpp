@@ -7,7 +7,7 @@ NodeVec::~NodeVec() {
 }
 
 Node* NodeVec::GetNode(int id) {
-	for (int i = 0; i < nodes.Size; i++) {
+	for (int i = 0; i < nodes.size(); i++) {
 		if (nodes[i]->id == id) {
 			return nodes[i];
 		}
@@ -22,25 +22,29 @@ void NodeVec::AddNode(Node* node) {
 void NodeVec::RemoveNode(int id) {
 	Node* node = GetNode(id);
 	delete node;
-	nodes.find_erase(node);
+	nodes.erase(std::find(nodes.begin(), nodes.end(), node));
 }
 
 void NodeVec::RemoveNode(Node* node) {
-	nodes.find_erase(node);
+	nodes.erase(std::find(nodes.begin(), nodes.end(), node));
 }
 
 int NodeVec::Size() {
-	return nodes.Size;
+	return (int)nodes.size();
 }
 
-Node** NodeVec::begin() {
+std::vector<Node*>::iterator NodeVec::begin() {
 	return nodes.begin();
 }
 
-Node** NodeVec::end() {
+std::vector<Node*>::iterator NodeVec::end() {
 	return nodes.end();
 }
 
 Node* NodeVec::operator[](int pos) {
+	return nodes[pos];
+}
+
+Node* NodeVec::at(int pos) {
 	return nodes[pos];
 }

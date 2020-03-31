@@ -10,7 +10,7 @@
 
 class NodeVec {
 private:
-	ImVector<Node*> nodes;
+	std::vector<Node*> nodes;
 public:
 	NodeVec();
 	virtual ~NodeVec();
@@ -21,10 +21,11 @@ public:
 	void RemoveNode(Node* node);
 	
 	int Size();
-	Node** begin();
-	Node** end();
+	std::vector<Node*>::iterator begin();
+	std::vector<Node*>::iterator end();
 
 	Node* operator[](int pos);
+	Node* at(int pos);
 };
 #endif // NODEVEC_H
 

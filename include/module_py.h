@@ -16,9 +16,11 @@ protected:
 	std::vector<std::string> ParseLine(std::string line);
 	json::value_t ParseType(std::string type);
 public:
-	ModulePy(const std::string name, const std::string script_file);
+	ModulePy(const std::string function_name);
+	ModulePy(const std::string function_name, const std::string script_file);
 	virtual ~ModulePy();
 
+	void Run();
 	void Run(json* parameters);
 };
 

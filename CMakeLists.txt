@@ -24,6 +24,25 @@ target_link_libraries(VisualNLP PRIVATE nlohmann_json::nlohmann_json)
 target_include_directories(VisualNLP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include 
 ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
+
+if(MSVC)
+    add_compile_options("/W4" "$<$<CONFIG:RELEASE>:/O2>")
+else()
+    add_compile_options("-Wall" "-Wextra" "-Werror" "$<$<CONFIG:RELEASE>:-O3>")
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        add_compile_options("-stdlib=libc++")
+    else()
+        # nothing special for gcc at the moment
+    endif()
+endif()
+
+
+
+# Script file copying.
+file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/scripts)
+
+message(STATUS "Removed old scripts in binary directory")
+
 # Copy contents of scripts folder to binary directory.
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/scripts
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

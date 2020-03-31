@@ -14,6 +14,10 @@ ImVec2 NodeConn::Pos() {
 	return node->GetSlotPos(slot_num, type);
 }
 
+bool NodeConn::HasLink() const {
+	return links.size() > 0;
+}
+
 void NodeConn::AddLink(NodeLink* link) {
 	if (type == Conn_Type::input) {
 		RemoveLinks();
@@ -25,7 +29,7 @@ void NodeConn::AddLink(NodeLink* link) {
 }
 
 void NodeConn::RemoveLink(NodeLink* link) {
-	links.find_erase(link);
+	links.erase(std::find(links.begin(), links.end(), link));
 }
 
 void NodeConn::RemoveLinks() {
@@ -35,8 +39,28 @@ void NodeConn::RemoveLinks() {
 	links.clear();
 }
 
-ImVector<NodeLink*>* NodeConn::GetLinks() {
+std::vector<NodeLink*>* NodeConn::GetLinks() {
 	return &links;
+}
+
+std::string NodeConn::Label() {
+	if (type == Conn_Type::input) {
+		return (*node->module->ParamNames())[slot_num];
+	}
+	else {
+		return "";
+	}
+}
+
+std::string NodeConn::DataType() {
+	json::value_t data_type = json::value_t::null;
+	if (type == Conn_Type::input) {
+		data_type = (*node->module->ParamTypes())[slot_num];
+	}
+	else if (type == Conn_Type::output) {
+		data_type = (*node->module->ReturnTypes())[slot_num];
+	}
+	return node->module->TypeToString(data_type);
 }
 
 bool NodeConn::Hovered(ImVec2 offset) {
@@ -53,7 +77,7 @@ void NodeConn::Draw(ImDrawList* draw_list, ImVec2 offset) {
 	ImVec2 conn_pos = offset + Pos();
 
 	if (Hovered(offset)) {
-		conn_colour = IM_COL32(175, 175, 175, 175);
+		conn_colour = HOVER_COLOUR;
 	}
 
 	draw_list->ChannelsSetCurrent(2);

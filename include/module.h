@@ -26,23 +26,35 @@ protected:
 	std::vector<json::value_t> param_types;
 	std::vector<json::value_t> return_types;
 
+	std::vector<std::string> TypesToString(std::vector<json::value_t> types) const;
+
+	json* custom_params;
 	json* results;
 public:
-	Module(const std::string name, const std::string script_file);
+	Module(const std::string function_name);
+	Module(const std::string function_name, const std::string script_file);
 	virtual ~Module();
 
-	virtual std::string FunctionName();
-	virtual std::string ScriptFile();
-	virtual int NumParams();
-	virtual int NumReturns();
-	virtual const std::vector<std::string>* ParamNames();
-	virtual const std::vector<json::value_t>* ParamTypes();
-	virtual const std::vector<json::value_t>* ReturnTypes();
+	std::string FunctionName() const;
+	std::string ScriptFile() const;
+	int ParamsCount() const;
+	int ReturnsCount() const;
+	const std::vector<std::string>* ParamNames() const;
+	const std::vector<json::value_t>* ParamTypes() const;
+	const std::vector<json::value_t>* ReturnTypes() const;
+	std::vector<std::string> ParamTypesToString() const;
+	std::vector<std::string> ReturnTypesToString() const;
 
-	virtual json* Results();
+	std::string TypeToString(json::value_t data_type) const;
+
+	void SetCustomParam(json param);
+	json* CustomParams();
+
+	virtual json* Results() const;
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
 
+	virtual void Run() = 0;
 	virtual void Run(json* parameters) = 0;
 };
 #endif // MODULE_H

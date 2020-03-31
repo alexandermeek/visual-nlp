@@ -8,7 +8,7 @@
 
 class NodeLink {
 public:
-	ImU32 COLOUR = IM_COL32(200, 200, 100, 255);
+	ImU32 COLOUR = IM_COL32(255, 153, 0, 255);
 
 	NodeConn* start;
 	NodeConn* end;

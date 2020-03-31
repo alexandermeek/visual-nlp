@@ -5,8 +5,10 @@
 #include "node_conn.h"
 #include "node_link.h"
 #include "module.h"
+#include "exceptions.h"
 
 #include <imgui/imgui.h>
+#include <nlohmann/json.hpp>
 
 #include <vector>
 #include <string>
@@ -14,6 +16,8 @@
 class Node {
 private:
 	const ImVec2		NODE_WINDOW_PADDING = ImVec2(8.0f, 8.0f);
+	const ImU32			HOVER_BG_COL = IM_COL32(40, 40, 40, 255);
+	const ImU32			BG_COL = IM_COL32(48, 48, 48, 255);
 
 	static int			next_id;
 
@@ -22,15 +26,16 @@ private:
 public:
 	int					id;
 	std::string			name;
-	int					inputs_count, outputs_count;
-	ImVector<NodeConn*> input_conns;
-	ImVector<NodeConn*> output_conns;
+	std::vector<NodeConn*> input_conns;
+	std::vector<NodeConn*> output_conns;
 
-	Module*				module;
+	Module* module;
 
-	Node(const std::string name, ImVec2 pos, ImVec2 size, int inputs_count, int outputs_count);
+	Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module);
 	virtual ~Node();
 
+	int InputsCount();
+	int OutputsCount();
 	ImVec2 GetSlotPos(int slot_num, Conn_Type type);
 	ImVec2 Pos();
 	ImVec2 Size();
@@ -41,8 +46,9 @@ public:
 	NodeConn* GetConn(int slot_num, Conn_Type type);
 
 	void Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered);
-	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn);
+	void CheckConns(ImVec2 offset, bool& conn_hover, NodeConn*& hovered_conn, bool& conn_drag, NodeConn*& dragged_conn, bool& node_drag);
 
-	void Run();
+	json* Results();
+	void Run(bool force_rerun);
 };
 #endif //NODE_H
