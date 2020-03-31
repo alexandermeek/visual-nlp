@@ -4,10 +4,11 @@ Module::Module(const std::string function_name)
 	: Module(function_name, function_name) {}
 
 Module::Module(const std::string function_name, const std::string script_file)
-	: function_name(function_name), script_file(script_file), results(nullptr) {}
+	: function_name(function_name), script_file(script_file), results(nullptr), custom_params(nullptr) {}
 
 Module::~Module() {
 	delete results;
+	delete custom_params;
 }
 
 std::string Module::FunctionName() const {
@@ -77,6 +78,22 @@ std::vector<std::string> Module::TypesToString(std::vector<json::value_t> types)
 		types_str.push_back(TypeToString(t));
 	}
 	return types_str;
+}
+
+void Module::SetCustomParam(json param) {
+	assert(param.type() == json::value_t::object);
+
+	if (custom_params == nullptr) {
+		custom_params = new json();
+	}
+
+	for (json::iterator it = param.begin(); it != param.end(); ++it) {
+		(*custom_params)[it.key()] = it.value();
+	}
+}
+
+json* Module::CustomParams() {
+	return custom_params;
 }
 
 json* Module::Results() const {

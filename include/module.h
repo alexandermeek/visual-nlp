@@ -27,6 +27,9 @@ protected:
 	std::vector<json::value_t> return_types;
 
 	std::vector<std::string> TypesToString(std::vector<json::value_t> types) const;
+
+	json* custom_params;
+	json* results;
 public:
 	Module(const std::string function_name);
 	Module(const std::string function_name, const std::string script_file);
@@ -44,10 +47,13 @@ public:
 
 	std::string TypeToString(json::value_t data_type) const;
 
+	void SetCustomParam(json param);
+	json* CustomParams();
+
 	virtual json* Results() const;
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
-	json* results;
+
 	virtual void Run() = 0;
 	virtual void Run(json* parameters) = 0;
 };

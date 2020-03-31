@@ -43,6 +43,8 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		NodeLink* link_1 = new NodeLink(nodes->at(0)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(0, Conn_Type::input));
 		NodeLink* link_2 = new NodeLink(nodes->at(1)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(1, Conn_Type::input));
 		initialised = true;
+
+		//nodes->at(2)->module->SetCustomParam(json{ { "x", 4 } });
 	}
 
 	bool open_context_menu = false;

@@ -111,7 +111,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
 	ImGui::Text("%s", name.c_str());
-	ImGui::Text("Node description...");
+	//ImGui::Text("Node description...");
 	json* results = Results();
 	if (results && !results->empty()) {
 		ImGui::Text("Result(s): %s", results->dump().c_str());
@@ -175,6 +175,9 @@ void Node::Run(bool force_rerun) {
 	else {
 		json* params = new json(json::array());
 
+		const std::vector<std::string>* param_names = module->ParamNames();
+		json* custom_params = module->CustomParams();
+
 		for (int i = 0; i < inputs_count; i++) {
 			Node* prev_node;
 			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
@@ -190,9 +193,14 @@ void Node::Run(bool force_rerun) {
 				if (prev_node->Results() == nullptr || force_rerun) {
 					prev_node->Run(force_rerun);
 				}
-
-				// Insert parameters into list
-				auto it = params->insert(params->begin() + i, *prev_node->Results());
+				
+				// Check if there exists a custom parameter, if so insert in place.
+				if (custom_params != nullptr && custom_params->find(param_names->at(i)) != custom_params->end()) {
+					params->push_back(custom_params->at(param_names->at(i)));
+				}
+				else {
+					params->push_back(*prev_node->Results());
+				}
 			}
 		}
 		module->Run(params);

@@ -28,13 +28,27 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	ImGui::End();
 }
 
+void CustomParamEditor(Node* node, std::string param_name) {
+	if (!ImGui::Begin("Custom Param Editor", NULL)) {
+		ImGui::End();
+		return;
+	}
+
+	if (node) {
+		char input[200]; // this is all fucked
+		ImGui::InputTextMultiline("param input", input, 200);
+		std::cout << input;
+	}
+	ImGui::End();
+}
+
 void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::exception** ex) {
 	if (!ImGui::Begin("Node Editor", p_open)) {
 		ImGui::End();
 		return;
 	}
 
-	if (node != nullptr) {
+	if (node) {
 		if (ImGui::Selectable(node->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick, 
 			ImVec2(ImGui::GetWindowWidth() - 70, ImGui::GetTextLineHeight()))) {
 			if (ImGui::IsMouseDoubleClicked(0)) {
@@ -49,20 +63,24 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::excep
 		ImGui::Dummy(ImVec2(2, 2));
 		ImGui::Text("Parameters:");
 		{
-			std::vector<std::string> p_names = *node->module->ParamNames();
+			const std::vector<std::string>* p_names = node->module->ParamNames();
 			std::vector<std::string> p_types = node->module->ParamTypesToString();
 
-			if (p_names.size() <= 0) {
+			if (p_names->size() <= 0) {
 				ImGui::SameLine();
 				ImGui::Text("None");
 			}
 			else {
 				ImGui::Separator();
-				ImGui::Columns(2);
-				for (int i = 0; i < p_names.size(); i++) {
-					ImGui::Text(p_names[i].c_str());
+				ImGui::Columns(3);
+				for (int i = 0; i < p_names->size(); i++) {
+					ImGui::Text(p_names->at(i).c_str());
 					ImGui::NextColumn();
 					ImGui::Text(p_types[i].c_str());
+					ImGui::NextColumn();
+					if (ImGui::SmallButton("set")) {
+						CustomParamEditor(node, p_names->at(i));
+					}
 					ImGui::NextColumn();
 				}
 			}
