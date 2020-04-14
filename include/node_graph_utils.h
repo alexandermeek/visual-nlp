@@ -8,10 +8,12 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 // Forward declarations
 void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats);
-void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::exception** ex);
+void ValueEditor(bool* p_open, std::tuple<Node*, Conn_Type, std::string>* value_to_edit);
+void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, std::tuple<Node*, Conn_Type, std::string>* value_to_edit, std::exception** ex);
 void ErrorPopups(bool* show_error_popup, std::exception** ex);
 void RunMenu(Node* node, bool* show_error_popup, std::exception** ex);
 void RunNode(Node* node, bool force_reruns, bool* show_error_popup, std::exception** ex);
@@ -27,22 +29,37 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 
 	ImGui::End();
 }
-
-void CustomParamEditor(Node* node, std::string param_name) {
-	if (!ImGui::Begin("Custom Param Editor", NULL)) {
+void ValueEditor(bool* p_open, std::tuple<Node*, Conn_Type, std::string>* value_to_edit) {
+	if (!ImGui::Begin("Value Editor", p_open)) {
 		ImGui::End();
 		return;
 	}
 
+	Node * node;
+	Conn_Type conn_type;
+	std::string value_name;
+
+	std::tie(node, conn_type, value_name) = *value_to_edit;
+
 	if (node) {
-		char input[200]; // this is all fucked
-		ImGui::InputTextMultiline("param input", input, 200);
-		std::cout << input;
+		static char input[200];
+		
+		ImGui::Text(node->name.c_str());
+		ImGui::Separator();
+		ImGui::Text(value_name.c_str());
+		
+		ImGui::InputTextMultiline("", input, 200);
+		if (ImGui::SmallButton("Save")) {
+			std::stringstream ss;
+			ss << "{ \"" << value_name << "\": " << input << " }";
+			node->module->SetCustomParam(json::parse(ss.str()));
+			std::cout << node->module->CustomParams()->dump(4) << std::endl;
+		}
 	}
 	ImGui::End();
 }
 
-void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::exception** ex) {
+void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, std::tuple<Node*, Conn_Type, std::string>* value_to_edit, std::exception** ex) {
 	if (!ImGui::Begin("Node Editor", p_open)) {
 		ImGui::End();
 		return;
@@ -79,7 +96,8 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::excep
 					ImGui::Text(p_types[i].c_str());
 					ImGui::NextColumn();
 					if (ImGui::SmallButton("set")) {
-						CustomParamEditor(node, p_names->at(i));
+						*show_param_editor = true;
+						*value_to_edit = std::make_tuple(node, Conn_Type::input, p_names->at(i));
 					}
 					ImGui::NextColumn();
 				}

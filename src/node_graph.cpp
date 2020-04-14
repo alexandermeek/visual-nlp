@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
@@ -33,8 +34,12 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static bool show_grid = true;
 	static int node_selected = -1;
 
+	static bool show_param_editor = false;
+	static std::tuple<Node*, Conn_Type, std::string> value_to_edit;
+	if (show_param_editor) ValueEditor(&show_param_editor, &value_to_edit);
+
 	static bool show_node_editor = false;
-	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &ex);
+	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &show_param_editor, &value_to_edit, &ex);
 
 	if (!initialised) {
 		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
