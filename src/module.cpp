@@ -100,6 +100,10 @@ json* Module::CustomParams() {
 	return custom_params;
 }
 
+bool Module::HasCustomParam(std::string param_name) {
+	return (custom_params != nullptr && custom_params->find(param_name) != custom_params->end());
+}
+
 json* Module::Results() const {
 	return results;
 }

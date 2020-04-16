@@ -237,7 +237,6 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::PopStyleVar();
 
 
-
 	// Scrolling
 	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(2, 0.0f))
 		scrolling = scrolling + ImGui::GetIO().MouseDelta;

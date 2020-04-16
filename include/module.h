@@ -50,6 +50,7 @@ public:
 	void RemoveCustomParam(std::string param_name);
 	void SetCustomParam(json param);
 	json* CustomParams();
+	bool HasCustomParam(std::string param_name);
 
 	virtual json* Results() const;
 	virtual std::vector<json::value_t> ResultTypes();

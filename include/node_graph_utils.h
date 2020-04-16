@@ -50,10 +50,9 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 		static char input[200];
 
 		if (conn_type == Conn_Type::input) {
-			json* custom_params = node->module->CustomParams();
 			if (std::get<0>(old_value) != nullptr && (std::get<0>(old_value)->id != node->id || std::get<2>(old_value) != value_name)) {
-				if (custom_params != nullptr && custom_params->find(value_name) != custom_params->end()) {
-					strcpy_s(input, custom_params->at(value_name).dump(4).c_str());
+				if (node->module->HasCustomParam(value_name)) {
+					strcpy_s(input, node->module->CustomParams()->at(value_name).dump(4).c_str());
 				}
 				else {
 					strcpy_s(input, "");
@@ -80,6 +79,7 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 		ImGui::SameLine();
 		if (ImGui::SmallButton("Clear")) {
 			node->module->RemoveCustomParam(value_name);
+			strcpy_s(input, "");
 		}
 	}
 	old_value = *value_to_edit;

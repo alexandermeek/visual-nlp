@@ -182,19 +182,21 @@ void Node::Run(bool force_rerun) {
 			Node* prev_node;
 			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
 
-			if (links->size() <= 0) {
+			if (links->size() <= 0 && !input_conns[i]->IsEdited()) {
 				throw MissingInputException("No input links detected.", module);
 			}
 			else {
-
-				prev_node = links->at(0)->start->node;
-
 				// Check if there exists a custom parameter, if so insert in place. Otherwise run previous node
-				if (custom_params != nullptr && custom_params->find(param_names->at(i)) != custom_params->end()) {
+				if (input_conns[i]->IsEdited()) {
 					params->push_back(custom_params->at(param_names->at(i)));
 				}
-				else if (prev_node->Results() == nullptr || force_rerun) {
-					prev_node->Run(force_rerun);
+				else {
+					prev_node = links->at(0)->start->node;
+
+					if (prev_node->Results() == nullptr || force_rerun) {
+						prev_node->Run(force_rerun);
+					}
+
 					params->push_back(*prev_node->Results());
 				}
 			}
