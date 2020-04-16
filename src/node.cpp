@@ -74,7 +74,7 @@ NodeConn* Node::GetConn(int slot_num, Conn_Type type) {
 			return nullptr;
 		}
 		return input_conns[slot_num];
-	} 
+	}
 	else if (type == Conn_Type::output) {
 		if (slot_num >= OutputsCount()) {
 			return nullptr;
@@ -189,16 +189,12 @@ void Node::Run(bool force_rerun) {
 
 				prev_node = links->at(0)->start->node;
 
-				// Run previous node if hasn't run already
-				if (prev_node->Results() == nullptr || force_rerun) {
-					prev_node->Run(force_rerun);
-				}
-				
-				// Check if there exists a custom parameter, if so insert in place.
+				// Check if there exists a custom parameter, if so insert in place. Otherwise run previous node
 				if (custom_params != nullptr && custom_params->find(param_names->at(i)) != custom_params->end()) {
 					params->push_back(custom_params->at(param_names->at(i)));
 				}
-				else {
+				else if (prev_node->Results() == nullptr || force_rerun) {
+					prev_node->Run(force_rerun);
 					params->push_back(*prev_node->Results());
 				}
 			}

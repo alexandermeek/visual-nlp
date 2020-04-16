@@ -8,10 +8,14 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <tuple>
+
+using ModuleValue = std::tuple<Node*, Conn_Type, std::string>;
 
 // Forward declarations
 void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats);
-void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::exception** ex);
+void ValueEditor(bool* p_open, ModuleValue* value_to_edit);
+void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, ModuleValue* value_to_edit, std::exception** ex);
 void ErrorPopups(bool* show_error_popup, std::exception** ex);
 void RunMenu(Node* node, bool* show_error_popup, std::exception** ex);
 void RunNode(Node* node, bool force_reruns, bool* show_error_popup, std::exception** ex);
@@ -28,28 +32,63 @@ void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
 	ImGui::End();
 }
 
-void CustomParamEditor(Node* node, std::string param_name) {
-	if (!ImGui::Begin("Custom Param Editor", NULL)) {
+void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
+	if (!ImGui::Begin("Value Editor", p_open)) {
 		ImGui::End();
 		return;
 	}
 
+	static ModuleValue old_value;
+
+	Node* node;
+	Conn_Type conn_type;
+	std::string value_name;
+
+	std::tie(node, conn_type, value_name) = *value_to_edit;
+
 	if (node) {
-		char input[200]; // this is all fucked
-		ImGui::InputTextMultiline("param input", input, 200);
-		std::cout << input;
+		static char input[200];
+
+		if (conn_type == Conn_Type::input) {
+			json* custom_params = node->module->CustomParams();
+			if (std::get<0>(old_value) != nullptr && (std::get<0>(old_value)->id != node->id || std::get<2>(old_value) != value_name)) {
+				if (custom_params != nullptr && custom_params->find(value_name) != custom_params->end()) {
+					strcpy_s(input, custom_params->at(value_name).dump(4).c_str());
+				}
+				else {
+					strcpy_s(input, "");
+				}
+			}
+		}
+
+
+		ImGui::Text(node->name.c_str());
+		ImGui::Separator();
+		ImGui::Text(value_name.c_str());
+
+		ImGui::InputTextMultiline("", input, 200);
+		if (ImGui::SmallButton("Save")) {
+			if (std::strlen(input) <= 0) {
+				strcpy_s(input, "null");
+			}
+			std::stringstream ss;
+			ss << "{ \"" << value_name << "\": " << input << " }";
+			node->module->SetCustomParam(json::parse(ss.str()));
+			std::cout << node->module->CustomParams()->dump(4) << std::endl;
+		}
 	}
+	old_value = *value_to_edit;
 	ImGui::End();
 }
 
-void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::exception** ex) {
+void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, ModuleValue* value_to_edit, std::exception** ex) {
 	if (!ImGui::Begin("Node Editor", p_open)) {
 		ImGui::End();
 		return;
 	}
 
 	if (node) {
-		if (ImGui::Selectable(node->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick, 
+		if (ImGui::Selectable(node->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick,
 			ImVec2(ImGui::GetWindowWidth() - 70, ImGui::GetTextLineHeight()))) {
 			if (ImGui::IsMouseDoubleClicked(0)) {
 				std::cout << "double click";
@@ -78,8 +117,10 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, std::excep
 					ImGui::NextColumn();
 					ImGui::Text(p_types[i].c_str());
 					ImGui::NextColumn();
-					if (ImGui::SmallButton("set")) {
-						CustomParamEditor(node, p_names->at(i));
+					std::string button_name = "set##" + std::to_string(i);
+					if (ImGui::SmallButton(button_name.c_str())) {
+						*show_param_editor = true;
+						*value_to_edit = std::make_tuple(node, Conn_Type::input, p_names->at(i));
 					}
 					ImGui::NextColumn();
 				}

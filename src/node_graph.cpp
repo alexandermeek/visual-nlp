@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
@@ -33,8 +34,12 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static bool show_grid = true;
 	static int node_selected = -1;
 
+	static bool show_param_editor = false;
+	static ModuleValue value_to_edit;
+	if (show_param_editor) ValueEditor(&show_param_editor, &value_to_edit);
+
 	static bool show_node_editor = false;
-	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &ex);
+	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &show_param_editor, &value_to_edit, &ex);
 
 	if (!initialised) {
 		nodes->AddNode(new Node("Node X", ImVec2(40.0f, 50.0f), ImVec2(0.5f, 0.5f), new ModulePy("value")));
@@ -122,7 +127,8 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		}
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(255, 153, 0, 255), 3.0f);
-	} else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
+	}
+	else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
 		if (dragged_conn->node != hovered_conn->node) {
 			if (dragged_conn->type == Conn_Type::input) {
 				NodeLink* link = new NodeLink(hovered_conn, dragged_conn);
@@ -159,13 +165,13 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		bool node_moving_active = ImGui::IsItemActive();
 		if (node_widgets_active || node_moving_active)
 			node_selected = node->id;
-		if (node_moving_active && ImGui::IsMouseDragging(0)){
+		if (node_moving_active && ImGui::IsMouseDragging(0)) {
 			node_drag = true;
 			if (!conn_hover && !conn_drag) {
 				node->Move(node->Pos() + ImGui::GetIO().MouseDelta);
 			}
 		}
-		
+
 		node->CheckConns(offset, conn_hover, hovered_conn, conn_drag, dragged_conn, node_drag);
 
 		ImGui::PopID();
@@ -181,7 +187,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	}
 	// Remove links on conn right click
 	if (conn_hover && ImGui::IsMouseClicked(1)) hovered_conn->RemoveLinks();
-	
+
 	// Tooltips for node connectors
 	if (conn_hover) {
 		std::stringstream ss;
@@ -230,7 +236,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	}
 	ImGui::PopStyleVar();
 
-	
+
 
 	// Scrolling
 	if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(2, 0.0f))
@@ -259,7 +265,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		std::stringstream ss;
 		ss << "NodeSize(" << node->Size().x << "," << node->Size().y << ")";
 		stats.push_back(ss.str());
-		
+
 		ss.str("");
 		ss << "NodeID: " << node->id << " NodeName: " << node->name;
 		stats.push_back(ss.str());
