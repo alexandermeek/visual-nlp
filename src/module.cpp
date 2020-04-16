@@ -80,6 +80,10 @@ std::vector<std::string> Module::TypesToString(std::vector<json::value_t> types)
 	return types_str;
 }
 
+void Module::RemoveCustomParam(std::string param_name) {
+	custom_params->erase(param_name);
+}
+
 void Module::SetCustomParam(json param) {
 	assert(param.type() == json::value_t::object);
 

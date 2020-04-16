@@ -47,6 +47,7 @@ public:
 
 	std::string TypeToString(json::value_t data_type) const;
 
+	void RemoveCustomParam(std::string param_name);
 	void SetCustomParam(json param);
 	json* CustomParams();
 
