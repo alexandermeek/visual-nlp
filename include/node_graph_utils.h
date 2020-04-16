@@ -69,7 +69,6 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 		ImGui::InputTextMultiline("", input, 200);
 		if (ImGui::SmallButton("Save")) {
 			if (std::strlen(input) <= 0) {
-				//strcpy_s(input, "null");
 				node->module->RemoveCustomParam(value_name);
 			}
 			else {
@@ -77,7 +76,10 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 				ss << "{ \"" << value_name << "\": " << input << " }";
 				node->module->SetCustomParam(json::parse(ss.str()));
 			}
-			std::cout << node->module->CustomParams()->dump(4) << std::endl;
+		}
+		ImGui::SameLine();
+		if (ImGui::SmallButton("Clear")) {
+			node->module->RemoveCustomParam(value_name);
 		}
 	}
 	old_value = *value_to_edit;

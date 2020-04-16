@@ -81,7 +81,7 @@ std::vector<std::string> Module::TypesToString(std::vector<json::value_t> types)
 }
 
 void Module::RemoveCustomParam(std::string param_name) {
-	custom_params->erase(param_name);
+	if (custom_params != nullptr) custom_params->erase(param_name);
 }
 
 void Module::SetCustomParam(json param) {
