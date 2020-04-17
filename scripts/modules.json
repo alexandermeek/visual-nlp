@@ -1,0 +1,22 @@
+[
+    {
+        "module_type" : "python",
+        "script_file" : "value",
+        "function_name" : "value"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "add",
+        "function_name" : "add"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "mul",
+        "function_name" : "mul"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "script",
+        "function_name" : "Run"
+    }
+]

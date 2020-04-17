@@ -1,9 +1,10 @@
 #include "node_vec.h"
+#include "module_loader.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
-void ShowModuleSelector(bool* p_open, NodeVec* nodes) {
+void ShowModuleSelector(bool* p_open, ModuleLoader* module_loader, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(400, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Module Selector", p_open, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
@@ -23,11 +24,9 @@ void ShowModuleSelector(bool* p_open, NodeVec* nodes) {
     // left
     static int selected = 0;
     ImGui::BeginChild("left pane", ImVec2(150, 0), true);
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < module_loader->NumModules(); i++)
     {
-        char label[128];
-        sprintf_s(label, "MyObject %d", i);
-        if (ImGui::Selectable(label, selected == i))
+        if (ImGui::Selectable(module_loader->Modules()[i]->FunctionName().c_str(), selected == i))
             selected = i;
     }
     ImGui::EndChild();
