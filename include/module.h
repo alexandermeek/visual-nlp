@@ -31,6 +31,7 @@ protected:
 	json* custom_params;
 	json* results;
 public:
+	Module(const Module& module);
 	Module(const std::string function_name);
 	Module(const std::string function_name, const std::string script_file);
 	virtual ~Module();

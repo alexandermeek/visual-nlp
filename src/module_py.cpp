@@ -1,6 +1,9 @@
 #include "module_py.h"
 #include "exceptions.h"
 
+ModulePy::ModulePy(const ModulePy& module) 
+	: ModulePy(module.function_name, module.script_file) {}
+
 ModulePy::ModulePy(const std::string function_name) : ModulePy(function_name, function_name) {}
 
 ModulePy::ModulePy(const std::string function_name, const std::string script_file) : Module(function_name, script_file) {

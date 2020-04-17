@@ -1,5 +1,8 @@
 #include "module.h"
 
+Module::Module(const Module& module) 
+	: Module(module.function_name, module.script_file) {}
+
 Module::Module(const std::string function_name)
 	: Module(function_name, function_name) {}
 
