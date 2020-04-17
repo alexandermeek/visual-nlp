@@ -184,15 +184,27 @@ void ErrorPopups(bool* show_error_popup, std::exception** ex) { // TODO: add exc
 
 void RunMenu(Node* node, bool* show_error_popup, std::exception** ex) {
 	if (ImGui::BeginMenu("Run")) {
-		if (ImGui::IsMouseClicked(0)) {
+		if (ImGui::IsAnyItemHovered() && ImGui::IsMouseDown(0)) {
 			RunNode(node, false, show_error_popup, ex);
 			ImGui::CloseCurrentPopup();
 		}
-		if (ImGui::MenuItem("Run missing")) {
+		if (ImGui::MenuItem("Run")) {
 			RunNode(node, false, show_error_popup, ex);
 		}
-		if (ImGui::MenuItem("Run all (force reruns)")) {
+		// Tooltip for "Run" menuitem.
+		if (ImGui::IsItemHovered()) {
+			ImGui::BeginTooltip();
+			ImGui::Text("Only run nodes missing results.");
+			ImGui::EndTooltip();
+		}
+		if (ImGui::MenuItem("Run -f")) {
 			RunNode(node, true, show_error_popup, ex);
+		}
+		// Tooltip for "Run -f" menuitem.
+		if (ImGui::IsItemHovered()) {
+			ImGui::BeginTooltip();
+			ImGui::Text("Run all nodes again.");
+			ImGui::EndTooltip();
 		}
 		ImGui::EndMenu();
 	}
