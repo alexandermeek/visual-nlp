@@ -19,6 +19,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
 		ImGui::End();
+		return;
 	}
 
 	static std::vector<std::string> stats;
