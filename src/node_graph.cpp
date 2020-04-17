@@ -223,7 +223,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			}
 			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
 			if (ImGui::MenuItem("Delete")) {
-				if (std::get<0>(value_to_edit)->id == node_selected) {
+				if (std::get<0>(value_to_edit) && std::get<0>(value_to_edit)->id == node_selected) {
 					value_to_edit = std::make_tuple((Node*)nullptr, Conn_Type::input, "");
 				}
 				nodes->RemoveNode(node_selected);

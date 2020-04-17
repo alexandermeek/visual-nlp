@@ -72,7 +72,7 @@ json ModuleLoader::ModuleToJson(Module* module) const {
 }
 
 Module* ModuleLoader::JsonToModule(json module_json) const {
-	Module* module;
+	Module* module = nullptr;
 	if (module_json["module_type"] == "python") {
 		module = new ModulePy(module_json["function_name"], module_json["script_file"]);
 	}

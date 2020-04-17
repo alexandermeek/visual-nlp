@@ -98,7 +98,9 @@ void ShowModuleSelector(bool* p_open, ModuleLoader* module_loader, NodeVec* node
     }
     ImGui::EndChild();
     if (ImGui::Button("Create Node")) {
-		nodes->AddNode(new Node("New Node", ImVec2(), ImVec2(), new ModulePy(*(ModulePy*)selected_module)));
+		if (selected_module) {
+			nodes->AddNode(new Node("New Node", ImVec2(), ImVec2(), new ModulePy(*(ModulePy*)selected_module)));
+		}
 	}
     ImGui::SameLine();
     if (ImGui::Button("Save")) {}
