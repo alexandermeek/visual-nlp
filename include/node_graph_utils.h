@@ -93,12 +93,13 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 	}
 
 	if (node) {
-		if (ImGui::Selectable(node->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick,
+		ImGui::Text(node->name.c_str());
+		/*if (ImGui::Selectable(node->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick,
 			ImVec2(ImGui::GetWindowWidth() - 70, ImGui::GetTextLineHeight()))) {
 			if (ImGui::IsMouseDoubleClicked(0)) {
 				std::cout << "double click";
 			}
-		}
+		}*/
 		ImGui::SameLine(ImGui::GetWindowWidth() - 50);
 		RunMenu(node, show_error_popup, ex);
 
