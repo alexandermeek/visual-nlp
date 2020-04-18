@@ -35,6 +35,11 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	static bool show_grid = true;
 	static int node_selected = -1;
 
+	static bool show_rename = false;
+	static std::string* rename_string;
+	if (show_rename) ImGui::OpenPopup("Rename");
+	Rename(&show_rename, rename_string);
+
 	static bool show_param_editor = false;
 	static ModuleValue value_to_edit;
 	if (show_param_editor) ValueEditor(&show_param_editor, &value_to_edit);
@@ -223,7 +228,10 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 			if (ImGui::MenuItem("Edit")) {
 				show_node_editor = true;
 			}
-			if (ImGui::MenuItem("Rename..", NULL, false, false)) {}
+			if (ImGui::MenuItem("Rename..")) {
+				show_rename = true;
+				rename_string = &node->name;
+			}
 			if (ImGui::MenuItem("Delete")) {
 				if (std::get<0>(value_to_edit) && std::get<0>(value_to_edit)->id == node_selected) {
 					value_to_edit = std::make_tuple((Node*)nullptr, Conn_Type::input, "");

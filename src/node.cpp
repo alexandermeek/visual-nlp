@@ -118,7 +118,7 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
 	ImGui::Text("%s", name.c_str());
-	//ImGui::Text("Node description...");
+	ImGui::Text("f(): %s", module->FunctionName().c_str());
 	json* results = Results();
 	if (results && !results->empty()) {
 		ImGui::Text("Result(s): %s", results->dump().c_str());

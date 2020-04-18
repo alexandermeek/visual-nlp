@@ -16,6 +16,7 @@ using ModuleValue = std::tuple<Node*, Conn_Type, std::string>;
 void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats);
 void ValueEditor(bool* p_open, ModuleValue* value_to_edit);
 void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, ModuleValue* value_to_edit, std::exception** ex);
+void Rename(bool* show_rename, std::string* string);
 void ErrorPopups(bool* show_error_popup, std::exception** ex);
 void RunMenu(Node* node, bool* show_error_popup, std::exception** ex);
 void RunNode(Node* node, bool force_reruns, bool* show_error_popup, std::exception** ex);
@@ -176,6 +177,23 @@ void ErrorPopups(bool* show_error_popup, std::exception** ex) { // TODO: add exc
 			ImGui::CloseCurrentPopup();
 			if (*ex != nullptr) delete* ex;
 			*show_error_popup = false;
+		}
+		ImGui::SetItemDefaultFocus();
+		ImGui::EndPopup();
+	}
+}
+
+void Rename(bool* show_rename, std::string* string) {
+	if (ImGui::BeginPopupModal("Rename", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		static char rename_text[100];
+		strcpy_s(rename_text, string->c_str());
+		ImGui::InputText("##Rename", rename_text, IM_ARRAYSIZE(rename_text));
+		*string = rename_text;
+
+		if (ImGui::Button("OK", ImVec2(120, 0))) {
+			*show_rename = false;
+			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SetItemDefaultFocus();
 		ImGui::EndPopup();
