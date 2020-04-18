@@ -28,8 +28,6 @@ void ModuleLoader::Read() {
 			modules.push_back(JsonToModule(module));
 		}
 	}
-	std::cout << file_path.str() << std::endl;
-	std::cout << modules_json.dump(4) << std::endl;
 }
 
 void ModuleLoader::Save() {

@@ -115,7 +115,7 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 	draw_list->ChannelsSplit(3);
 
 	// Draw links to mouse
-	if (conn_drag && ImGui::IsMouseDown(0)) {
+	if (conn_drag && ImGui::IsMouseDown(0) && !dragged_conn->IsEdited()) {
 		draw_list->ChannelsSetCurrent(2);
 		ImVec2 p1, p2;
 		if (dragged_conn->type == Conn_Type::input) {
@@ -129,7 +129,9 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 
 		draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(255, 153, 0, 255), 3.0f);
 	}
-	else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) && dragged_conn->type != hovered_conn->type) {
+	else if (conn_drag && conn_hover && !ImGui::IsMouseDown(0) 
+		&& !hovered_conn->IsEdited() 
+		&& dragged_conn->type != hovered_conn->type) {
 		if (dragged_conn->node != hovered_conn->node) {
 			if (dragged_conn->type == Conn_Type::input) {
 				NodeLink* link = new NodeLink(hovered_conn, dragged_conn);

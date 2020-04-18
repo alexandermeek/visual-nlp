@@ -23,6 +23,8 @@ private:
 
 	ImVec2				pos;
 	ImVec2				size;
+
+	void CreateConns();
 public:
 	int					id;
 	std::string			name;
@@ -31,6 +33,7 @@ public:
 
 	Module* module;
 
+	Node(const std::string name, Module* module);
 	Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module);
 	virtual ~Node();
 

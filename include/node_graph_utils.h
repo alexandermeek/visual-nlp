@@ -123,7 +123,7 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 					ImGui::NextColumn();
 					ImGui::Text(p_types[i].c_str());
 					ImGui::NextColumn();
-					std::string button_name = "set##" + std::to_string(i);
+					std::string button_name = "edit##" + std::to_string(i);
 					if (ImGui::SmallButton(button_name.c_str())) {
 						*show_param_editor = true;
 						*value_to_edit = std::make_tuple(node, Conn_Type::input, p_names->at(i));

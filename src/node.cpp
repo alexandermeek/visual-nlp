@@ -3,20 +3,14 @@
 #include <iostream>
 int Node::next_id = 0;
 
+Node::Node(const std::string name, Module* module) 
+	: Node(name, ImVec2(), ImVec2(), module) {}
+
 Node::Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module)
 	: name(name), pos(pos), size(size), module(module) {
 	this->id = next_id++;
 
-	if (module) {
-		for (int i = 0; i < module->ParamsCount(); i++) {
-			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
-			input_conns.push_back(new_conn);
-		}
-		for (int i = 0; i < module->ReturnsCount(); i++) {
-			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
-			output_conns.push_back(new_conn);
-		}
-	}
+	CreateConns();
 }
 
 Node::~Node() {
@@ -30,6 +24,19 @@ Node::~Node() {
 	output_conns.clear();
 
 	delete module;
+}
+
+void Node::CreateConns() {
+	if (module) {
+		for (int i = 0; i < module->ParamsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
+			input_conns.push_back(new_conn);
+		}
+		for (int i = 0; i < module->ReturnsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
+			output_conns.push_back(new_conn);
+		}
+	}
 }
 
 int Node::InputsCount() {
