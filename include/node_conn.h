@@ -22,6 +22,7 @@ private:
 	const float RADIUS = 4.0f;
 	const ImU32 COLOUR = IM_COL32(255, 153, 0, 255);
 	const ImU32 HOVER_COLOUR = IM_COL32(204, 122, 0, 255);
+	const ImU32 EDITED_COLOUR = IM_COL32(204, 0, 0, 255);
 public:
 	int       slot_num;
 	Conn_Type type;
@@ -38,7 +39,9 @@ public:
 	void RemoveLinks();
 	std::vector<NodeLink*>* GetLinks();
 
-	std::string Label();
+	bool IsEdited() const;
+
+	std::string Label() const;
 	std::string DataType();
 
 	bool Hovered(ImVec2 offset);

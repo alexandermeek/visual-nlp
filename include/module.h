@@ -12,7 +12,6 @@
 #include <cctype>
 #include <sstream>
 
-namespace py = pybind11;
 using json = nlohmann::json;
 
 class Module {
@@ -31,6 +30,7 @@ protected:
 	json* custom_params;
 	json* results;
 public:
+	Module(const Module& module);
 	Module(const std::string function_name);
 	Module(const std::string function_name, const std::string script_file);
 	virtual ~Module();
@@ -47,10 +47,12 @@ public:
 
 	std::string TypeToString(json::value_t data_type) const;
 
+	void RemoveCustomParam(std::string param_name);
 	void SetCustomParam(json param);
 	json* CustomParams();
+	bool HasCustomParam(std::string param_name);
 
-	virtual json* Results() const;
+	virtual json* Results();
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
 

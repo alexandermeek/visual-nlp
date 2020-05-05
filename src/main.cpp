@@ -2,6 +2,8 @@
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
 #include "node_vec.h"
+#include "module_loader.h"
+#include "debugger.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx9.h>
@@ -17,8 +19,9 @@ static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
 static D3DPRESENT_PARAMETERS    g_d3dpp = {};
 
 // Forward declarations of helper functions
-void ShowAppMainMenuBar(bool* show_node_graph, bool* show_node_graph_debug, bool* show_demo_window, bool* show_graph_window, bool* show_nodes_window);
-void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes);
+void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_debugger, bool* show_demo_window);
+void ShowNodeGraph(bool* p_open, NodeVec* nodes);
+void ShowModuleSelector(bool* p_open, ModuleLoader* module_loader, NodeVec* nodes);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
 void ResetDevice();
@@ -77,13 +80,14 @@ int main(int, char**)
 
 	// Pointers to data
 	NodeVec* nodes = new NodeVec();
+	ModuleLoader* module_loader = new ModuleLoader("modules");
+	Debugger debugger;
 
 	// Our state
-	bool show_node_graph = false;
-	bool show_node_graph_debug = false;
+	bool show_module_selector = true;
+	bool show_node_graph = true;
+	bool show_debugger = false;
 	bool show_demo_window = false;
-	bool show_graph_window = false;
-	bool show_nodes_window = false;
 	ImVec4 clear_color = ImVec4(0.25f, 0.4f, 0.55f, 1.00f);
 
 	// Main loop
@@ -108,20 +112,20 @@ int main(int, char**)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ShowAppMainMenuBar(&show_node_graph, &show_node_graph_debug, &show_demo_window, &show_graph_window, &show_nodes_window);
+		ShowAppMainMenuBar(&show_module_selector, &show_node_graph, &show_debugger, &show_demo_window);
 
-		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+		if (show_module_selector)
+			ShowModuleSelector(&show_module_selector, module_loader, nodes);
+
+		if (show_node_graph)
+			ShowNodeGraph(&show_node_graph, nodes);
+
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
-		if (show_graph_window)
-			ImGui::ShowExampleAppCustomNodeGraph(&show_graph_window);
+		if (show_debugger)
+			debugger.Show(&show_debugger);
 
-		if (show_nodes_window)
-			ImGui::ShowExampleAppCustomNodeGraph2(&show_nodes_window);
-
-		if (show_node_graph)
-			ShowNodeGraph(&show_node_graph, &show_node_graph_debug, nodes);
 
 		// Rendering
 		ImGui::EndFrame();
@@ -143,6 +147,7 @@ int main(int, char**)
 			ResetDevice();
 	}
 	delete nodes;
+	delete module_loader;
 
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -157,7 +162,7 @@ int main(int, char**)
 
 // Helper functions ---------
 // Main Menu Bar
-void ShowAppMainMenuBar(bool* show_node_graph, bool* show_node_graph_debug, bool* show_demo_window, bool* show_graph_window, bool* show_nodes_window)
+void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_debugger, bool* show_demo_window)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -178,7 +183,9 @@ void ShowAppMainMenuBar(bool* show_node_graph, bool* show_node_graph_debug, bool
 		}
 		if (ImGui::BeginMenu("View"))
 		{
-			if (ImGui::MenuItem("Module Selector")) {}
+			if (ImGui::MenuItem("Module Selector")) {
+				*show_module_selector = true;
+			}
 			if (ImGui::MenuItem("Node graph")) {
 				*show_node_graph = true;
 			}
@@ -186,18 +193,12 @@ void ShowAppMainMenuBar(bool* show_node_graph, bool* show_node_graph_debug, bool
 			{
 				*show_demo_window = true;
 			}
-			/*if (ImGui::MenuItem("Graph test")) {
-				*show_graph_window = true;
-			}
-			if (ImGui::MenuItem("Node test")) {
-				*show_nodes_window = true;
-			}*/
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Tools"))
 		{
-			if (ImGui::MenuItem("Graph Debugger")) {
-				*show_node_graph_debug = true;
+			if (ImGui::MenuItem("Debugger")) {
+				*show_debugger = true;
 			}
 			ImGui::EndMenu();
 		}

@@ -43,7 +43,11 @@ std::vector<NodeLink*>* NodeConn::GetLinks() {
 	return &links;
 }
 
-std::string NodeConn::Label() {
+bool NodeConn::IsEdited() const {
+	return node->module->HasCustomParam(Label());
+}
+
+std::string NodeConn::Label() const {
 	if (type == Conn_Type::input) {
 		return (*node->module->ParamNames())[slot_num];
 	}
@@ -78,6 +82,11 @@ void NodeConn::Draw(ImDrawList* draw_list, ImVec2 offset) {
 
 	if (Hovered(offset)) {
 		conn_colour = HOVER_COLOUR;
+	}
+
+	if (IsEdited()) {
+		conn_colour = EDITED_COLOUR;
+		RemoveLinks();
 	}
 
 	draw_list->ChannelsSetCurrent(2);

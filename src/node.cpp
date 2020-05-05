@@ -3,20 +3,14 @@
 #include <iostream>
 int Node::next_id = 0;
 
+Node::Node(const std::string name, Module* module) 
+	: Node(name, ImVec2(), ImVec2(), module) {}
+
 Node::Node(const std::string name, ImVec2 pos, ImVec2 size, Module* module)
 	: name(name), pos(pos), size(size), module(module) {
 	this->id = next_id++;
 
-	if (module) {
-		for (int i = 0; i < module->ParamsCount(); i++) {
-			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
-			input_conns.push_back(new_conn);
-		}
-		for (int i = 0; i < module->ReturnsCount(); i++) {
-			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
-			output_conns.push_back(new_conn);
-		}
-	}
+	CreateConns();
 }
 
 Node::~Node() {
@@ -30,6 +24,19 @@ Node::~Node() {
 	output_conns.clear();
 
 	delete module;
+}
+
+void Node::CreateConns() {
+	if (module) {
+		for (int i = 0; i < module->ParamsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::input);
+			input_conns.push_back(new_conn);
+		}
+		for (int i = 0; i < module->ReturnsCount(); i++) {
+			NodeConn* new_conn = new NodeConn(this, i, Conn_Type::output);
+			output_conns.push_back(new_conn);
+		}
+	}
 }
 
 int Node::InputsCount() {
@@ -111,10 +118,16 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
 	ImGui::BeginGroup(); // Lock horizontal position
 	ImGui::Text("%s", name.c_str());
-	//ImGui::Text("Node description...");
+	ImGui::Text("f(): %s", module->FunctionName().c_str());
 	json* results = Results();
 	if (results && !results->empty()) {
-		ImGui::Text("Result(s): %s", results->dump().c_str());
+		std::string results_str = results->dump().c_str();
+		if (results_str.size() > 4) {
+			results_str = results_str.substr(0, 3) + "...";
+			
+		}
+		ImGui::Text("Result(s): %s", results_str.c_str());
+		//ImGui::Text("Result: %s", module->TypeToString(results->type()).c_str());
 	}
 	ImGui::EndGroup();
 
@@ -182,20 +195,29 @@ void Node::Run(bool force_rerun) {
 			Node* prev_node;
 			std::vector<NodeLink*>* links = input_conns[i]->GetLinks();
 
-			if (links->size() <= 0) {
+			if (links->size() <= 0 && !input_conns[i]->IsEdited()) {
 				throw MissingInputException("No input links detected.", module);
 			}
 			else {
-
-				prev_node = links->at(0)->start->node;
-
 				// Check if there exists a custom parameter, if so insert in place. Otherwise run previous node
-				if (custom_params != nullptr && custom_params->find(param_names->at(i)) != custom_params->end()) {
+				if (input_conns[i]->IsEdited()) {
 					params->push_back(custom_params->at(param_names->at(i)));
 				}
-				else if (prev_node->Results() == nullptr || force_rerun) {
-					prev_node->Run(force_rerun);
-					params->push_back(*prev_node->Results());
+				else {
+					prev_node = links->at(0)->start->node;
+
+					if (prev_node->Results() == nullptr  || prev_node->Results()->empty() || force_rerun) {
+						prev_node->Run(force_rerun);
+					}
+
+					if (prev_node->OutputsCount() > 1) {
+						int prev_conn_slot = links->at(0)->start->slot_num;
+						params->push_back(prev_node->Results()->at(prev_conn_slot));
+					}
+					else {
+						params->push_back(*prev_node->Results());
+					}
+					
 				}
 			}
 		}

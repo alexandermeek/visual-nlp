@@ -1,6 +1,9 @@
 #include "module_py.h"
 #include "exceptions.h"
 
+ModulePy::ModulePy(const ModulePy& module) 
+	: ModulePy(module.function_name, module.script_file) {}
+
 ModulePy::ModulePy(const std::string function_name) : ModulePy(function_name, function_name) {}
 
 ModulePy::ModulePy(const std::string function_name, const std::string script_file) : Module(function_name, script_file) {
@@ -112,7 +115,7 @@ void ModulePy::Run(json* parameters) {
 	py::function f = py::module::import(script_path.str().c_str()).attr(function_name.c_str()); // import function with in script file and module name
 
 	py::object py_args;
-	if (!parameters->empty() && parameters != nullptr) {
+	if (parameters != nullptr && !parameters->empty()) {
 		py_args = py_json.attr("loads")(py::str(parameters->dump())); // parse json parameters from c to python
 	}
 
