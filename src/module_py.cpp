@@ -115,7 +115,7 @@ void ModulePy::Run(json* parameters) {
 	py::function f = py::module::import(script_path.str().c_str()).attr(function_name.c_str()); // import function with in script file and module name
 
 	py::object py_args;
-	if (!parameters->empty() && parameters != nullptr) {
+	if (parameters != nullptr && !parameters->empty()) {
 		py_args = py_json.attr("loads")(py::str(parameters->dump())); // parse json parameters from c to python
 	}
 

@@ -6,6 +6,11 @@
     },
     {
         "module_type" : "python",
+        "script_file" : "2value",
+        "function_name" : "twovalues"
+    },
+    {
+        "module_type" : "python",
         "script_file" : "add",
         "function_name" : "add"
     },

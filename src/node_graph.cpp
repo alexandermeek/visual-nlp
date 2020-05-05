@@ -4,6 +4,7 @@
 #include "module.h"
 #include "module_py.h"
 #include "node_graph_utils.h"
+#include "debugger.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -15,15 +16,12 @@
 #include <sstream>
 #include <tuple>
 
-void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
+void ShowNodeGraph(bool* p_open, NodeVec* nodes) {
 	ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
 	if (!ImGui::Begin("Node Graph", p_open)) {
 		ImGui::End();
 		return;
 	}
-
-	static std::vector<std::string> stats;
-	if (*debug) ShowDiagnosticsWindow(debug, &stats);
 
 	static bool show_error_popup = false;
 	static std::exception* ex; // Exception caught, saved for error message output.
@@ -54,8 +52,6 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		NodeLink* link_1 = new NodeLink(nodes->at(0)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(0, Conn_Type::input));
 		NodeLink* link_2 = new NodeLink(nodes->at(1)->GetConn(0, Conn_Type::output), nodes->at(2)->GetConn(1, Conn_Type::input));
 		initialised = true;
-
-		//nodes->at(2)->module->SetCustomParam(json{ { "x", 4 } });
 	}
 
 	bool open_context_menu = false;
@@ -259,32 +255,32 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 		scrolling = scrolling + ImGui::GetIO().MouseDelta;
 
 	// Update Diagnostics
-	stats.clear();
-	if (conn_drag) stats.push_back("Drag = TRUE");
-	else stats.push_back("Drag = FALSE");
+	Debugger debugger;
+	if (conn_drag) debugger.Add("Drag", "TRUE");
+	else debugger.Add("Drag", "FALSE");
 	if (conn_hover) {
-		stats.push_back("Hover = TRUE");
+		debugger.Add("Hover", "TRUE");
 		std::stringstream ss;
 		ImVec2 conn_pos = hovered_conn->Pos();
-		ss << "ConnPos(" << conn_pos.x << "," << conn_pos.y << ")";
-		stats.push_back(ss.str());
+		ss << "(" << conn_pos.x << "," << conn_pos.y << ")";
+		debugger.Add("ConnPos", ss.str());
 	}
-	else stats.push_back("Hover = FALSE");
+	else debugger.Add("Hover", "FALSE");
 	{
 		ImVec2 mouse_pos = ImGui::GetIO().MousePos - offset;
 		std::stringstream ss;
-		ss << "RelMousePos(" << mouse_pos.x << "," << mouse_pos.y << ")";
-		stats.push_back(ss.str());
+		ss << "(" << mouse_pos.x << "," << mouse_pos.y << ")";
+		debugger.Add("RelMousePos", ss.str());
 	}
 	if (node_selected != -1) {
 		Node* node = nodes->GetNode(node_selected);
 		std::stringstream ss;
-		ss << "NodeSize(" << node->Size().x << "," << node->Size().y << ")";
-		stats.push_back(ss.str());
+		ss << "(" << node->Size().x << "," << node->Size().y << ")";
+		debugger.Add("NodeSize", ss.str());
 
 		ss.str("");
-		ss << "NodeID: " << node->id << " NodeName: " << node->name;
-		stats.push_back(ss.str());
+		ss << node->id << " Name: " << node->name;
+		debugger.Add("NodeID", ss.str());
 	}
 
 	ImGui::PopItemWidth();

@@ -204,10 +204,23 @@ void Node::Run(bool force_rerun) {
 						prev_node->Run(force_rerun);
 					}
 
-					params->push_back(*prev_node->Results());
+					if (prev_node->OutputsCount() > 1) {
+						int prev_conn_slot = links->at(0)->start->slot_num;
+						//std::cout << prev_conn_slot << std::endl;
+						params->push_back(prev_node->Results()->at(prev_conn_slot));
+					}
+					else {
+						params->push_back(*prev_node->Results());
+					}
+					
 				}
 			}
 		}
+
+		Debugger debugger;
+		std::stringstream ss;
+		ss << "Params for Node" << id;
+		debugger.Add(ss.str(), params->dump(4));
 		module->Run(params);
 	}
 }

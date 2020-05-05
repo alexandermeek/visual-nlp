@@ -3,6 +3,7 @@
 
 #include "node_vec.h"
 #include "module_loader.h"
+#include "debugger.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx9.h>
@@ -18,8 +19,8 @@ static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
 static D3DPRESENT_PARAMETERS    g_d3dpp = {};
 
 // Forward declarations of helper functions
-void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_node_graph_debug, bool* show_demo_window);
-void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes);
+void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_debugger, bool* show_demo_window);
+void ShowNodeGraph(bool* p_open, NodeVec* nodes);
 void ShowModuleSelector(bool* p_open, ModuleLoader* module_loader, NodeVec* nodes);
 bool CreateDeviceD3D(HWND hWnd);
 void CleanupDeviceD3D();
@@ -80,11 +81,12 @@ int main(int, char**)
 	// Pointers to data
 	NodeVec* nodes = new NodeVec();
 	ModuleLoader* module_loader = new ModuleLoader("modules");
+	Debugger debugger;
 
 	// Our state
 	bool show_module_selector = false;
 	bool show_node_graph = false;
-	bool show_node_graph_debug = false;
+	bool show_debugger = false;
 	bool show_demo_window = false;
 	ImVec4 clear_color = ImVec4(0.25f, 0.4f, 0.55f, 1.00f);
 
@@ -110,16 +112,20 @@ int main(int, char**)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ShowAppMainMenuBar(&show_module_selector, &show_node_graph, &show_node_graph_debug, &show_demo_window);
+		ShowAppMainMenuBar(&show_module_selector, &show_node_graph, &show_debugger, &show_demo_window);
 
 		if (show_module_selector)
 			ShowModuleSelector(&show_module_selector, module_loader, nodes);
 
 		if (show_node_graph)
-			ShowNodeGraph(&show_node_graph, &show_node_graph_debug, nodes);
+			ShowNodeGraph(&show_node_graph, nodes);
 
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
+
+		if (show_debugger)
+			debugger.Show(&show_debugger);
+
 
 		// Rendering
 		ImGui::EndFrame();
@@ -156,7 +162,7 @@ int main(int, char**)
 
 // Helper functions ---------
 // Main Menu Bar
-void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_node_graph_debug, bool* show_demo_window)
+void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool* show_debugger, bool* show_demo_window)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -191,8 +197,8 @@ void ShowAppMainMenuBar(bool* show_module_selector, bool* show_node_graph, bool*
 		}
 		if (ImGui::BeginMenu("Tools"))
 		{
-			if (ImGui::MenuItem("Graph Debugger")) {
-				*show_node_graph_debug = true;
+			if (ImGui::MenuItem("Debugger")) {
+				*show_debugger = true;
 			}
 			ImGui::EndMenu();
 		}

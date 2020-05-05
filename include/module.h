@@ -12,7 +12,6 @@
 #include <cctype>
 #include <sstream>
 
-namespace py = pybind11;
 using json = nlohmann::json;
 
 class Module {
