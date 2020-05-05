@@ -37,10 +37,7 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 	if (node) {
 		static char input[200];
 
-		if (std::get<0>(old_value) != nullptr && 
-			(std::get<0>(old_value)->id != node->id || 
-				std::get<1>(old_value) != conn_type || 
-				std::get<2>(old_value) != value_name)) {
+		auto refresh = [&]() {
 			if (conn_type == Conn_Type::input) {
 				if (node->module->HasCustomParam(value_name)) {
 					strcpy_s(input, node->module->CustomParams()->at(std::stoi(value_name)).dump(4).c_str());
@@ -65,9 +62,16 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 					strcpy_s(input, "");
 				}
 			}
-		}
-		
+		};
 
+		if (std::get<0>(old_value) == nullptr) refresh();
+		if (std::get<0>(old_value) != nullptr && 
+			(std::get<0>(old_value)->id != node->id || 
+				std::get<1>(old_value) != conn_type || 
+				std::get<2>(old_value) != value_name)) {
+
+			refresh();
+		}
 
 		ImGui::Text(node->name.c_str());
 		ImGui::Separator();
@@ -75,7 +79,12 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 			ImGui::Text(value_name.c_str());
 		}
 		else if (conn_type == Conn_Type::output) {
-			ImGui::Text("Result %s", value_name.c_str());
+			if (node->module->ReturnsCount() > 1) {
+				ImGui::Text("Result %s", value_name.c_str());
+			}
+			else {
+				ImGui::Text("Result");
+			}
 		}
 
 		ImGui::InputTextMultiline("", input, 200);
@@ -129,30 +138,7 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("Refresh")) {
-			if (conn_type == Conn_Type::input) {
-				if (node->module->HasCustomParam(value_name)) {
-					strcpy_s(input, node->module->CustomParams()->at(std::stoi(value_name)).dump(4).c_str());
-				}
-				else {
-					strcpy_s(input, "");
-				}
-			}
-			else if (conn_type == Conn_Type::output) {
-				json result;
-				if (node->module->ReturnsCount() > 1 && !node->module->Results()->empty()) {
-					result = node->module->Results()->at(std::stoi(value_name));
-				}
-				else {
-					result = *node->module->Results();
-				}
-
-				if (!result.empty()) {
-					strcpy_s(input, result.dump(4).c_str());
-				}
-				else {
-					strcpy_s(input, "");
-				}
-			}
+			refresh();
 		}
 	}
 	old_value = *value_to_edit;
