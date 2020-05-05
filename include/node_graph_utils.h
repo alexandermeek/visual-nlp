@@ -13,25 +13,12 @@
 using ModuleValue = std::tuple<Node*, Conn_Type, std::string>;
 
 // Forward declarations
-void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats);
 void ValueEditor(bool* p_open, ModuleValue* value_to_edit);
 void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show_param_editor, ModuleValue* value_to_edit, std::exception** ex);
 void Rename(bool* show_rename, std::string* string);
 void ErrorPopups(bool* show_error_popup, std::exception** ex);
 void RunMenu(Node* node, bool* show_error_popup, std::exception** ex);
 void RunNode(Node* node, bool force_reruns, bool* show_error_popup, std::exception** ex);
-
-void ShowDiagnosticsWindow(bool* p_open, std::vector<std::string>* stats) {
-	if (!ImGui::Begin("Node Graph Diagnostics", p_open)) {
-		ImGui::End();
-		return;
-	}
-	for (int i = 0; i < stats->size(); i++) {
-		ImGui::Text(stats->at(i).c_str());
-	}
-
-	ImGui::End();
-}
 
 void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 	if (!ImGui::Begin("Value Editor", p_open)) {
