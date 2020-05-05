@@ -21,7 +21,7 @@ void Debugger::Remove(std::string name) {
 }
 
 int Debugger::size() {
-	return Debugger::log.size();
+	return (int)Debugger::log.size();
 }
 
 bool Debugger::empty() {

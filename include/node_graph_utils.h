@@ -35,7 +35,7 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 	std::tie(node, conn_type, value_name) = *value_to_edit;
 
 	if (node) {
-		static char input[200];
+		static char input[2000];
 
 		auto refresh = [&]() {
 			if (conn_type == Conn_Type::input) {
