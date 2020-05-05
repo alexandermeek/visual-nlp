@@ -23,5 +23,15 @@
         "module_type" : "python",
         "script_file" : "script",
         "function_name" : "Run"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "readcsv",
+        "function_name" : "readcsv"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "writecsv",
+        "function_name" : "writecsv"
     }
 ]

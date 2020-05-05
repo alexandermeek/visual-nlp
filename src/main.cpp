@@ -84,8 +84,8 @@ int main(int, char**)
 	Debugger debugger;
 
 	// Our state
-	bool show_module_selector = false;
-	bool show_node_graph = false;
+	bool show_module_selector = true;
+	bool show_node_graph = true;
 	bool show_debugger = false;
 	bool show_demo_window = false;
 	ImVec4 clear_color = ImVec4(0.25f, 0.4f, 0.55f, 1.00f);

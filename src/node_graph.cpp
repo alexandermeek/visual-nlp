@@ -38,11 +38,11 @@ void ShowNodeGraph(bool* p_open, NodeVec* nodes) {
 	if (show_rename) ImGui::OpenPopup("Rename");
 	Rename(&show_rename, rename_string);
 
-	static bool show_param_editor = false;
+	static bool show_param_editor = true;
 	static ModuleValue value_to_edit;
 	if (show_param_editor) ValueEditor(&show_param_editor, &value_to_edit);
 
-	static bool show_node_editor = false;
+	static bool show_node_editor = true;
 	if (show_node_editor) ShowNodeEditor(&show_node_editor, nodes->GetNode(node_selected), &show_error_popup, &show_param_editor, &value_to_edit, &ex);
 
 	if (!initialised) {

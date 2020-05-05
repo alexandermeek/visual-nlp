@@ -40,7 +40,7 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 		auto refresh = [&]() {
 			if (conn_type == Conn_Type::input) {
 				if (node->module->HasCustomParam(value_name)) {
-					strcpy_s(input, node->module->CustomParams()->at(std::stoi(value_name)).dump(4).c_str());
+					strcpy_s(input, node->module->CustomParams()->at(value_name).dump(4).c_str());
 				}
 				else {
 					strcpy_s(input, "");
@@ -52,7 +52,9 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 					result = node->module->Results()->at(std::stoi(value_name));
 				}
 				else {
-					result = *node->module->Results();
+					if (node->module->Results() != nullptr) {
+						result = *node->module->Results();
+					}
 				}
 
 				if (!result.empty()) {
@@ -87,7 +89,9 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 			}
 		}
 
-		ImGui::InputTextMultiline("", input, 200);
+		ImVec2 size = ImGui::GetWindowSize();
+		size = size - ImVec2(15, 100);
+		ImGui::InputTextMultiline("", input, 200, size);
 		if (ImGui::SmallButton("Save")) {
 			if (conn_type == Conn_Type::input) {
 				if (std::strlen(input) <= 0) {
@@ -216,6 +220,14 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 					ImGui::NextColumn();
 				}
 			}
+		}
+		
+		json* results = node->module->Results();
+		if (results != nullptr && !results->empty()) {
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::Text("Results:");
+			ImGui::TextWrapped(node->module->Results()->dump(4).c_str());
 		}
 	}
 
