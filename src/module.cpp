@@ -7,7 +7,7 @@ Module::Module(const std::string function_name)
 	: Module(function_name, function_name) {}
 
 Module::Module(const std::string function_name, const std::string script_file)
-	: function_name(function_name), script_file(script_file), results(nullptr), custom_params(nullptr) {}
+	: function_name(function_name), script_file(script_file), results(new json()), custom_params(new json()) {}
 
 Module::~Module() {
 	delete results;
@@ -107,7 +107,7 @@ bool Module::HasCustomParam(std::string param_name) {
 	return (custom_params != nullptr && custom_params->find(param_name) != custom_params->end());
 }
 
-json* Module::Results() const {
+json* Module::Results() {
 	return results;
 }
 

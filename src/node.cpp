@@ -121,7 +121,11 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::Text("f(): %s", module->FunctionName().c_str());
 	json* results = Results();
 	if (results && !results->empty()) {
-		ImGui::Text("Result(s): %s", results->dump().c_str());
+		std::string results_str = results->dump().c_str();
+		if (results_str.size() > 4) {
+			results_str = results_str.substr(0, 4) + "...";
+		}
+		ImGui::Text("Result(s): %s", results_str.c_str());
 	}
 	ImGui::EndGroup();
 
@@ -200,13 +204,12 @@ void Node::Run(bool force_rerun) {
 				else {
 					prev_node = links->at(0)->start->node;
 
-					if (prev_node->Results() == nullptr || force_rerun) {
+					if (prev_node->Results() == nullptr  || prev_node->Results()->empty() || force_rerun) {
 						prev_node->Run(force_rerun);
 					}
 
 					if (prev_node->OutputsCount() > 1) {
 						int prev_conn_slot = links->at(0)->start->slot_num;
-						//std::cout << prev_conn_slot << std::endl;
 						params->push_back(prev_node->Results()->at(prev_conn_slot));
 					}
 					else {
@@ -216,11 +219,6 @@ void Node::Run(bool force_rerun) {
 				}
 			}
 		}
-
-		Debugger debugger;
-		std::stringstream ss;
-		ss << "Params for Node" << id;
-		debugger.Add(ss.str(), params->dump(4));
 		module->Run(params);
 	}
 }

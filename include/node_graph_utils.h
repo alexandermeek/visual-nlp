@@ -37,37 +37,122 @@ void ValueEditor(bool* p_open, ModuleValue* value_to_edit) {
 	if (node) {
 		static char input[200];
 
-		if (conn_type == Conn_Type::input) {
-			if (std::get<0>(old_value) != nullptr && (std::get<0>(old_value)->id != node->id || std::get<2>(old_value) != value_name)) {
+		if (std::get<0>(old_value) != nullptr && 
+			(std::get<0>(old_value)->id != node->id || 
+				std::get<1>(old_value) != conn_type || 
+				std::get<2>(old_value) != value_name)) {
+			if (conn_type == Conn_Type::input) {
 				if (node->module->HasCustomParam(value_name)) {
-					strcpy_s(input, node->module->CustomParams()->at(value_name).dump(4).c_str());
+					strcpy_s(input, node->module->CustomParams()->at(std::stoi(value_name)).dump(4).c_str());
+				}
+				else {
+					strcpy_s(input, "");
+				}
+			}
+			else if (conn_type == Conn_Type::output) {
+				json result;
+				if (node->module->ReturnsCount() > 1 && !node->module->Results()->empty()) {
+					result = node->module->Results()->at(std::stoi(value_name));
+				}
+				else {
+					result = *node->module->Results();
+				}
+
+				if (!result.empty()) {
+					strcpy_s(input, result.dump(4).c_str());
 				}
 				else {
 					strcpy_s(input, "");
 				}
 			}
 		}
+		
 
 
 		ImGui::Text(node->name.c_str());
 		ImGui::Separator();
-		ImGui::Text(value_name.c_str());
+		if (conn_type == Conn_Type::input) {
+			ImGui::Text(value_name.c_str());
+		}
+		else if (conn_type == Conn_Type::output) {
+			ImGui::Text("Result %s", value_name.c_str());
+		}
 
 		ImGui::InputTextMultiline("", input, 200);
 		if (ImGui::SmallButton("Save")) {
-			if (std::strlen(input) <= 0) {
-				node->module->RemoveCustomParam(value_name);
+			if (conn_type == Conn_Type::input) {
+				if (std::strlen(input) <= 0) {
+					node->module->RemoveCustomParam(value_name);
+				}
+				else {
+					std::stringstream ss;
+					ss << "{ \"" << value_name << "\": " << input << " }";
+					node->module->SetCustomParam(json::parse(ss.str()));
+				}
 			}
-			else {
-				std::stringstream ss;
-				ss << "{ \"" << value_name << "\": " << input << " }";
-				node->module->SetCustomParam(json::parse(ss.str()));
+			else if (conn_type == Conn_Type::output) {
+				json* results = node->module->Results();
+				if (node->module->ReturnsCount() > 1) {
+					if (!results->empty()) {
+						(*results)[std::stoi(value_name)] = json::parse(input);
+					}
+					else {
+						for (int i = 0; i < node->module->ReturnsCount(); i++) {
+							if (i == std::stoi(value_name)) {
+								(*results)[std::stoi(value_name)] = json::parse(input);
+							}
+							else {
+								(*results)[i] = json();
+							}
+						}
+					}
+				}
+				else {
+					*results = json::parse(input);
+				}
 			}
 		}
 		ImGui::SameLine();
 		if (ImGui::SmallButton("Clear")) {
-			node->module->RemoveCustomParam(value_name);
+			if (conn_type == Conn_Type::input) {
+				node->module->RemoveCustomParam(value_name);
+			}
+			else if (conn_type == Conn_Type::output) {
+				if (node->module->ReturnsCount() > 1) {
+					(*node->module->Results())[std::stoi(value_name)] = json();
+				}
+				else {
+					*node->module->Results() = json();
+				}
+			}
 			strcpy_s(input, "");
+		}
+		ImGui::SameLine();
+		if (ImGui::SmallButton("Refresh")) {
+			if (conn_type == Conn_Type::input) {
+				if (node->module->HasCustomParam(value_name)) {
+					strcpy_s(input, node->module->CustomParams()->at(std::stoi(value_name)).dump(4).c_str());
+				}
+				else {
+					strcpy_s(input, "");
+				}
+			}
+			else if (conn_type == Conn_Type::output) {
+				json result;
+				if (node->module->ReturnsCount() > 1 && !node->module->Results()->empty()) {
+					result = node->module->Results()->at(std::stoi(value_name));
+				}
+				else {
+					result = *node->module->Results();
+				}
+
+				if (!result.empty()) {
+					strcpy_s(input, result.dump(4).c_str());
+				}
+				else {
+					strcpy_s(input, "");
+				}
+			}
 		}
 	}
 	old_value = *value_to_edit;
@@ -111,7 +196,7 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 					ImGui::NextColumn();
 					ImGui::Text(p_types[i].c_str());
 					ImGui::NextColumn();
-					std::string button_name = "edit##" + std::to_string(i);
+					std::string button_name = "edit##param" + std::to_string(i);
 					if (ImGui::SmallButton(button_name.c_str())) {
 						*show_param_editor = true;
 						*value_to_edit = std::make_tuple(node, Conn_Type::input, p_names->at(i));
@@ -132,10 +217,16 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 			}
 			else {
 				ImGui::Separator();
-				ImGui::Columns(2);
+				ImGui::Columns(3);
 				for (int i = 0; i < r_types.size(); i++) {
 					ImGui::NextColumn();
 					ImGui::Text(r_types[i].c_str());
+					ImGui::NextColumn();
+					std::string button_name = "edit##return" + std::to_string(i);
+					if (ImGui::SmallButton(button_name.c_str())) {
+						*show_param_editor = true;
+						*value_to_edit = std::make_tuple(node, Conn_Type::output, std::to_string(i));
+					}
 					ImGui::NextColumn();
 				}
 			}

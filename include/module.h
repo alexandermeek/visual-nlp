@@ -52,7 +52,7 @@ public:
 	json* CustomParams();
 	bool HasCustomParam(std::string param_name);
 
-	virtual json* Results() const;
+	virtual json* Results();
 	virtual std::vector<json::value_t> ResultTypes();
 	void ClearResults();
 

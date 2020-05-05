@@ -255,7 +255,7 @@ void ShowNodeGraph(bool* p_open, NodeVec* nodes) {
 		scrolling = scrolling + ImGui::GetIO().MouseDelta;
 
 	// Update Diagnostics
-	Debugger debugger;
+	/*Debugger debugger;
 	if (conn_drag) debugger.Add("Drag", "TRUE");
 	else debugger.Add("Drag", "FALSE");
 	if (conn_hover) {
@@ -281,7 +281,7 @@ void ShowNodeGraph(bool* p_open, NodeVec* nodes) {
 		ss.str("");
 		ss << node->id << " Name: " << node->name;
 		debugger.Add("NodeID", ss.str());
-	}
+	}*/
 
 	ImGui::PopItemWidth();
 	ImGui::EndChild();
