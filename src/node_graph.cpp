@@ -241,13 +241,13 @@ void ShowNodeGraph(bool* p_open, bool* debug, NodeVec* nodes) {
 				dragged_conn = nullptr;
 				hovered_conn = nullptr;
 			}
-			if (ImGui::MenuItem("Copy", NULL, false, false)) {}
+			//if (ImGui::MenuItem("Copy", NULL, false, false)) {}
 		}
 		else {
 			if (ImGui::MenuItem("Add")) {
 				nodes->AddNode(new Node("New ADD", scene_pos, ImVec2(0.5f, 0.5f), new ModulePy("add")));
 			}
-			if (ImGui::MenuItem("Paste", NULL, false, false)) {}
+			//if (ImGui::MenuItem("Paste", NULL, false, false)) {}
 		}
 		ImGui::EndPopup();
 	}
