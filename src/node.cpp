@@ -121,7 +121,13 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::Text("f(): %s", module->FunctionName().c_str());
 	json* results = Results();
 	if (results && !results->empty()) {
-		ImGui::Text("Result: %s", module->TypeToString(results->type()).c_str());
+		std::string results_str = results->dump().c_str();
+		if (results_str.size() > 4) {
+			results_str = results_str.substr(0, 3) + "...";
+			
+		}
+		ImGui::Text("Result(s): %s", results_str.c_str());
+		//ImGui::Text("Result: %s", module->TypeToString(results->type()).c_str());
 	}
 	ImGui::EndGroup();
 
