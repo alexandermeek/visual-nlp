@@ -120,8 +120,9 @@ void Node::Draw(ImDrawList* draw_list, ImVec2 offset, bool hovered) {
 	ImGui::Text("%s", name.c_str());
 	ImGui::Text("f(): %s", module->FunctionName().c_str());
 	json* results = Results();
+
 	if (results && !results->empty()) {
-		std::string results_str = results->dump().c_str();
+		std::string results_str = results->dump();
 		if (results_str.size() > 4) {
 			results_str = results_str.substr(0, 3) + "...";
 			

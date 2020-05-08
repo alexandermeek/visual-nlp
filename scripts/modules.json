@@ -33,5 +33,25 @@
         "module_type" : "python",
         "script_file" : "writecsv",
         "function_name" : "writecsv"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "max_value",
+        "function_name" : "max_value"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "levenshtein",
+        "function_name" : "levenshtein"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "levenshtein_pred",
+        "function_name" : "levenshtein_pred"
+    },
+    {
+        "module_type" : "python",
+        "script_file" : "hamming_pred",
+        "function_name" : "hamming_pred"
     }
 ]

@@ -1,6 +1,6 @@
 #Params: filename=string
 #Return: array
-def readcsv2(filename):
+def readcsv(filename):
     import csv
 
     data = []
