@@ -227,7 +227,8 @@ void ShowNodeEditor(bool* p_open, Node* node, bool* show_error_popup, bool* show
 			ImGui::Columns(1);
 			ImGui::Separator();
 			ImGui::Text("Results:");
-			ImGui::TextWrapped(node->module->Results()->dump(4).c_str());
+			std::string results_str = results->dump(4);
+			ImGui::TextWrapped(results_str.c_str());
 		}
 	}
 

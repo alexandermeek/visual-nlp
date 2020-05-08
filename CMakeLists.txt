@@ -21,8 +21,11 @@ target_link_libraries(VisualNLP PRIVATE pybind11::embed)
 target_link_libraries(VisualNLP PRIVATE imgui)
 target_link_libraries(VisualNLP PRIVATE nlohmann_json::nlohmann_json)
 
-target_include_directories(VisualNLP PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include 
-${CMAKE_CURRENT_SOURCE_DIR}/lib)
+target_include_directories(VisualNLP PRIVATE 
+                           ${CMAKE_CURRENT_SOURCE_DIR} 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/src 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include 
+                           ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 
 if(MSVC)
@@ -32,7 +35,7 @@ else()
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options("-stdlib=libc++")
     else()
-        # nothing special for gcc at the moment
+        # GCC compile options...
     endif()
 endif()
 
